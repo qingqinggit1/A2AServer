@@ -55,11 +55,12 @@ class BasicAgent:
         self.all_functions = []
         self.conversation = [] # Initial conversation might be built later in run() or here
         self.tool_ready = False
-        loop = asyncio.get_event_loop()
-        try:
-            self.tool_ready = loop.run_until_complete(self.setup_tools())
-        except RuntimeError:
-            self.tool_ready = asyncio.run(self.setup_tools())
+        # 为啥在这里初始化工具后，工具就无法被调通呢，
+        # loop = asyncio.get_event_loop()
+        # try:
+        #     self.tool_ready = loop.run_until_complete(self.setup_tools())
+        # except RuntimeError:
+        #     self.tool_ready = asyncio.run(self.setup_tools())
 
     def _choose_model(self, model_name):
         # Helper method for model selection logic (synchronous)
