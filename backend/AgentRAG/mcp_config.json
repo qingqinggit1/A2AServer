@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "SearchTool": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--with",
+        "fastmcp",
+        "fastmcp",
+        "run",
+        "mcpserver/search_tool.py"
+      ]
+    },
+    "sequentialThinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    }
+  }
+}
