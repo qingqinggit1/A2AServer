@@ -5,7 +5,7 @@ import os
 from typing import Tuple, Optional, Any
 import uuid
 from ServiceTypes import Conversation, Event
-from common.A2Atypes import (
+from A2AServer.common.A2Atypes import (
     Message,
     Task,
     TextPart,

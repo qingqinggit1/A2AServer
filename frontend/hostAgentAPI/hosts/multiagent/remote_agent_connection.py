@@ -1,6 +1,6 @@
 from typing import Callable
 import uuid
-from common.A2Atypes import (
+from A2AServer.common.A2Atypes import (
     AgentCard,
     Task,
     TaskSendParams,
@@ -9,7 +9,7 @@ from common.A2Atypes import (
     TaskStatus,
     TaskState,
 )
-from common.client import A2AClient
+from A2AServer.common.client import A2AClient
 
 TaskCallbackArg = Task | TaskStatusUpdateEvent | TaskArtifactUpdateEvent
 TaskUpdateCallback = Callable[[TaskCallbackArg, AgentCard], Task]

@@ -11,6 +11,7 @@ Requires-Dist: tenacity
 Requires-Dist: mcp
 Requires-Dist: zhipuai
 Requires-Dist: cachetools
+Requires-Dist: asyncclick
 Requires-Dist: google-genai>=1.10.0
 
 # 创建python环境

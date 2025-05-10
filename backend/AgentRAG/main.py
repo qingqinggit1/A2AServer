@@ -2,10 +2,10 @@ import click
 import os
 import sys
 import logging
-from common.server import A2AServer
-from common.A2Atypes import AgentCard, AgentCapabilities, AgentSkill, MissingAPIKeyError
-from task_manager import AgentTaskManager
-from agent import BasicAgent
+from A2AServer.common.server import A2AServer
+from A2AServer.common.A2Atypes import AgentCard, AgentCapabilities, AgentSkill, MissingAPIKeyError
+from A2AServer.task_manager import AgentTaskManager
+from A2AServer.agent import BasicAgent
 from dotenv import load_dotenv
 
 load_dotenv()

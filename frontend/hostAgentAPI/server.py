@@ -7,7 +7,7 @@ import uuid
 from typing import Any
 from fastapi import APIRouter
 from fastapi import Request, Response
-from common.A2Atypes import Message, Task, FilePart, FileContent
+from A2AServer.common.A2Atypes import Message, Task, FilePart, FileContent
 from application_manager import ApplicationManager
 from adk_host_manager import ADKHostManager, get_message_id
 from ServiceTypes import (

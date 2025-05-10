@@ -6,7 +6,7 @@ from uuid import uuid4
 from enum import Enum
 from typing_extensions import Self
 
-from common.A2Atypes import Message, Task, TaskStatus, Artifact, JSONRPCMessage, JSONRPCRequest, JSONRPCError, JSONRPCResponse, AgentCard
+from A2AServer.common.A2Atypes import Message, Task, TaskStatus, Artifact, JSONRPCMessage, JSONRPCRequest, JSONRPCError, JSONRPCResponse, AgentCard
 
 
 class Conversation(BaseModel):

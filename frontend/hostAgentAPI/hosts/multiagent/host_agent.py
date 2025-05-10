@@ -19,8 +19,8 @@ from .remote_agent_connection import (
     RemoteAgentConnections,
     TaskUpdateCallback
 )
-from common.client import A2ACardResolver
-from common.A2Atypes import (
+from A2AServer.common.client import A2ACardResolver
+from A2AServer.common.A2Atypes import (
     AgentCard,
     Message,
     TaskState,

@@ -5,9 +5,9 @@ import os
 import urllib
 from uuid import uuid4
 
-from common.client import A2AClient, A2ACardResolver
-from common.A2Atypes import TaskState, Task, TextPart, FilePart, FileContent
-from common.utils.push_notification_auth import PushNotificationReceiverAuth
+from A2AServer.common.client import A2AClient, A2ACardResolver
+from A2AServer.common.A2Atypes import TaskState, Task, TextPart, FilePart, FileContent
+from A2AServer.common.utils.push_notification_auth import PushNotificationReceiverAuth
 
 
 @click.command()

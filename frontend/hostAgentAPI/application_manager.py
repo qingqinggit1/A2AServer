@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from common.A2Atypes import Message, Task, AgentCard
+from A2AServer.common.A2Atypes import Message, Task, AgentCard
 from ServiceTypes import Conversation, Event
 
 class ApplicationManager(ABC):
