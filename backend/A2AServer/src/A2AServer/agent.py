@@ -8,7 +8,7 @@ from typing import AsyncIterable, Any, Literal
 from pydantic import BaseModel
 from datetime import datetime
 
-from mcp_client.client import *
+from A2AServer.mcp_client.client import *
 
 logger = logging.getLogger(__name__)
 

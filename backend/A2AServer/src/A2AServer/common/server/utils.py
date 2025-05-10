@@ -1,4 +1,4 @@
-from common.A2Atypes import (
+from A2AServer.common.A2Atypes import (
     JSONRPCResponse,
     ContentTypeNotSupportedError,
     UnsupportedOperationError,

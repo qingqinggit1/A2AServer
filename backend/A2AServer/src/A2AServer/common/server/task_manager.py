@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Union, AsyncIterable, List
-from common.A2Atypes import Task
-from common.A2Atypes import (
+from A2AServer.common.A2Atypes import Task
+from A2AServer.common.A2Atypes import (
     JSONRPCResponse,
     TaskIdParams,
     TaskQueryParams,
@@ -31,7 +31,7 @@ from common.A2Atypes import (
     TaskPushNotificationConfig,
     InternalError,
 )
-from common.server.utils import new_not_implemented_error
+from A2AServer.common.server.utils import new_not_implemented_error
 import asyncio
 import logging
 

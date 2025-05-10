@@ -1,7 +1,7 @@
 import json
 import os
 from typing import AsyncIterable
-from common.A2Atypes import (
+from A2AServer.common.A2Atypes import (
     SendTaskRequest,
     TaskSendParams,
     Message,
@@ -20,9 +20,9 @@ from common.A2Atypes import (
     TaskArtifactUpdateEvent,
     TaskStatusUpdateEvent
 )
-from common.server.task_manager import InMemoryTaskManager
-from agent import BasicAgent
-import common.server.utils as utils
+from A2AServer.common.server.task_manager import InMemoryTaskManager
+from A2AServer.agent import BasicAgent
+import A2AServer.common.server.utils as utils
 import asyncio
 import logging
 import traceback
