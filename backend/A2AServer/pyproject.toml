@@ -16,6 +16,7 @@ dependencies = [
     "mcp",
     "zhipuai",
     "cachetools",
+    "asyncclick",
     "google-genai>=1.10.0",
 ]
 
