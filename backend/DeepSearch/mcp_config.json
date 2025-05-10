@@ -1,7 +1,15 @@
 {
   "mcpServers": {
     "SearchTool": {
-      "url": "http://127.0.0.1:7001/sse"
+      "command": "uv",
+      "args": [
+        "run",
+        "--with",
+        "fastmcp",
+        "fastmcp",
+        "run",
+        "mcpserver/search_tool.py"
+      ]
     },
     "sequentialThinking": {
       "command": "npx",
