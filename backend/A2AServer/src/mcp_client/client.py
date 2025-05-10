@@ -19,7 +19,11 @@ from .providers.anthropic import generate_with_anthropic
 from .providers.ollama import generate_with_ollama
 from .providers.lmstudio import generate_with_lmstudio
 
-logger = logging.getLogger("mcp_client")
+logging.basicConfig(
+    level=logging.INFO,
+    stream=sys.stdout,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
 
 
 class SSEMCPClient:
@@ -45,7 +49,7 @@ class SSEMCPClient:
             await self.session.initialize()
             return True
         except Exception as e:
-            logger.error(f"Server {self.server_name}: SSE connection error: {str(e)}")
+            logging.error(f"Server {self.server_name}: SSE connection error: {str(e)}")
             return False
 
     async def list_tools(self):
@@ -65,19 +69,19 @@ class SSEMCPClient:
             ]
             return self.tools
         except Exception as e:
-            logger.error(f"Server {self.server_name}: List tools error: {str(e)}")
+            logging.error(f"Server {self.server_name}: List tools error: {str(e)}")
             return []
 
     async def call_tool(self, tool_name: str, arguments: dict):
         if not self.session:
             return {"error": "MCP Not connected"}
         try:
-            logger.info(f"开始使用MCP协议调用工具，tool_name: {tool_name}, arguments: {arguments}")
+            logging.info(f"开始使用MCP协议调用工具，tool_name: {tool_name}, arguments: {arguments}")
             response = await self.session.call_tool(tool_name, arguments)
             # 将 pydantic 模型转换为字典格式
             return response.model_dump() if hasattr(response, 'model_dump') else response
         except Exception as e:
-            logger.error(f"call_tool: Server {self.server_name}: Tool call error: {str(e)}")
+            logging.error(f"call_tool: Server {self.server_name}: Tool call error: {str(e)}")
             return {"error": str(e)}
 
     async def stop(self):
@@ -190,18 +194,18 @@ class MCPClient:
                 resp = self.responses[req_id]
                 del self.responses[req_id]
                 if "error" in resp:
-                    logger.error(f"Server {self.server_name}: Initialize error: {resp['error']}")
+                    logging.error(f"Server {self.server_name}: Initialize error: {resp['error']}")
                     return False
                 if "result" in resp:
                     elapsed = asyncio.get_event_loop().time() - start
-                    logger.info(f"Server {self.server_name}: Initialized in {elapsed:.2f}s")
+                    logging.info(f"Server {self.server_name}: Initialized in {elapsed:.2f}s")
                     note = {"jsonrpc": "2.0", "method": "notifications/initialized"}
                     await self._send_message(note)
                     init_result = resp["result"]
                     self.server_capabilities = init_result.get("capabilities", {})
                     return True
             await asyncio.sleep(0.05)
-        logger.error(f"Server {self.server_name}: Initialize timed out after {timeout}s")
+        logging.error(f"Server {self.server_name}: Initialize timed out after {timeout}s")
         return False
 
     async def list_tools(self):
@@ -224,15 +228,15 @@ class MCPClient:
                 resp = self.responses[rid]
                 del self.responses[rid]
                 if "error" in resp:
-                    logger.error(f"Server {self.server_name}: List tools error: {resp['error']}")
+                    logging.error(f"Server {self.server_name}: List tools error: {resp['error']}")
                     return []
                 if "result" in resp and "tools" in resp["result"]:
                     elapsed = asyncio.get_event_loop().time() - start
-                    logger.info(f"Server {self.server_name}: Listed {len(resp['result']['tools'])} tools in {elapsed:.2f}s")
+                    logging.info(f"Server {self.server_name}: Listed {len(resp['result']['tools'])} tools in {elapsed:.2f}s")
                     self.tools = resp["result"]["tools"]
                     return self.tools
             await asyncio.sleep(0.05)
-        logger.error(f"Server {self.server_name}: List tools timed out after {timeout}s")
+        logging.error(f"Server {self.server_name}: List tools timed out after {timeout}s")
         return []
 
     async def call_tool(self, tool_name: str, arguments: dict):
@@ -251,28 +255,36 @@ class MCPClient:
         }
         await self._send_message(req)
 
-        start = asyncio.get_event_loop().time()
-        timeout = 3600  # Increased timeout to 30 seconds
-        while asyncio.get_event_loop().time() - start < timeout:
-            if rid in self.responses:
+        logging.debug(f"开始发送Sent request with id {rid} for tool {tool_name}")
+        try:
+            async def wait_for_response():
+                while rid not in self.responses:
+                    await asyncio.sleep(0.01)
                 resp = self.responses[rid]
                 del self.responses[rid]
-                if "error" in resp:
-                    logger.error(f"Server {self.server_name}: Tool {tool_name} error: {resp['error']}")
-                    return {"error": resp["error"]}
-                if "result" in resp:
-                    elapsed = asyncio.get_event_loop().time() - start
-                    logger.info(f"Server {self.server_name}: Tool {tool_name} completed in {elapsed:.2f}s")
-                    return resp["result"]
-            await asyncio.sleep(0.01)  # Reduced sleep interval for more responsive streaming
-            if asyncio.get_event_loop().time() - start > 5:  # Log warning after 5 seconds
-                logger.warning(f"Server {self.server_name}: Tool {tool_name} taking longer than 5s...")
-        logger.error(f"Server {self.server_name}: Tool {tool_name} timed out after {timeout}s")
-        return {"error": f"Timeout waiting for tool result after {timeout}s"}
+                return resp
+            timeout = 8  #工具的最大超时时间
+            start_time = asyncio.get_event_loop().time()
+            response = await asyncio.wait_for(wait_for_response(), timeout=timeout)
+            elapsed = asyncio.get_event_loop().time() - start_time
+
+            if "error" in response:
+                logging.error(f"错误：Server {self.server_name}: Tool {tool_name} error: {response['error']}")
+                return {"error": response["error"]}
+            if "result" in response:
+                logging.debug(f"Server {self.server_name}: Tool {tool_name} completed in {elapsed:.2f}s")
+                return response["result"]
+
+        except asyncio.TimeoutError:
+            logging.error(f"错误: Server {self.server_name}: Tool {tool_name} timed out after {timeout}s")
+            return {"error": f"Timeout waiting for tool result after {timeout}s"}
+        except Exception as e:
+            logging.error(f"错误: Server {self.server_name}: An unexpected error occurred: {e}")
+            return {"error": f"An unexpected error occurred: {e}"}
 
     async def _send_message(self, message: dict):
         if not self.process or self._shutdown:
-            logger.error(f"Server {self.server_name}: Cannot send message - process not running or shutting down")
+            logging.error(f"Server {self.server_name}: Cannot send message - process not running or shutting down")
             return False
         try:
             data = json.dumps(message) + "\n"
@@ -280,7 +292,7 @@ class MCPClient:
             await self.process.stdin.drain()
             return True
         except Exception as e:
-            logger.error(f"Server {self.server_name}: Error sending message: {str(e)}")
+            logging.error(f"Server {self.server_name}: Error sending message: {str(e)}")
             return False
 
     async def stop(self):
@@ -318,14 +330,14 @@ class MCPClient:
                         await asyncio.wait_for(self.process.wait(), timeout=1.0)
                     except asyncio.TimeoutError:
                         # Force kill if graceful shutdown fails
-                        logger.warning(f"Server {self.server_name}: Force killing process after timeout")
+                        logging.warning(f"Server {self.server_name}: Force killing process after timeout")
                         self.process.kill()
                         try:
                             await asyncio.wait_for(self.process.wait(), timeout=1.0)
                         except asyncio.TimeoutError:
-                            logger.error(f"Server {self.server_name}: Process did not respond to SIGKILL")
+                            logging.error(f"Server {self.server_name}: Process did not respond to SIGKILL")
                 except Exception as e:
-                    logger.error(f"Server {self.server_name}: Error during process cleanup: {str(e)}")
+                    logging.error(f"Server {self.server_name}: Error during process cleanup: {str(e)}")
                 finally:
                     # Make sure we clear the reference
                     self.process = None
@@ -435,7 +447,7 @@ async def log_messages_to_file(messages: List[Dict], functions: List[Dict], log_
                 "functions": functions
             }) + "\n")
     except Exception as e:
-        logger.error(f"Error logging messages to {log_path}: {str(e)}")
+        logging.error(f"Error logging messages to {log_path}: {str(e)}")
 
 async def process_tool_call(tc: Dict, servers: Dict[str, MCPClient], quiet_mode: bool) -> Optional[Dict]:
     """Process a single tool call and return the result"""
@@ -485,7 +497,7 @@ async def process_tool_call(tc: Dict, servers: Dict[str, MCPClient], quiet_mode:
                     "name": func_name,
                     "content": json.dumps({"error": f"Missing required parameter: {param}"})
                 }
-
+    print(f"开始调用call_tool")
     result = await servers[srv_name].call_tool(tool_name, func_args)
     print(f"工具{tool_name}运行结果:")
     print(json.dumps(result, indent=2, ensure_ascii=False))
@@ -611,7 +623,7 @@ async def run_interaction(
             with open(chosen_model["systemMessageFile"], "r", encoding="utf-8") as f:
                 system_msg = f.read()
         except Exception as e:
-            logger.warning(f"Failed to read system message file: {e}")
+            logging.warning(f"Failed to read system message file: {e}")
             # Fall back to direct systemMessage if available
             conversation.append({"role": "system", "content": chosen_model.get("systemMessage", system_msg)})
     else:
@@ -623,7 +635,7 @@ async def run_interaction(
                     system_msg = f.read()
                     conversation.append({"role": "system", "content": "File: " + file + "\n" + system_msg})
             except Exception as e:
-                logger.warning(f"Failed to read system message file: {e}")
+                logging.warning(f"Failed to read system message file: {e}")
 
     conversation.append({"role": "user", "content": user_query})
 
@@ -704,7 +716,7 @@ async def run_interaction(
                         tc["type"] = "function"
                     assistant_message["tool_calls"] = tool_calls
                 conversation.append(assistant_message)
-                logger.info(f"Added assistant message: {json.dumps(assistant_message, indent=2)}")
+                logging.info(f"Added assistant message: {json.dumps(assistant_message, indent=2)}")
 
                 if not tool_calls:
                     break
@@ -713,7 +725,7 @@ async def run_interaction(
                     result = await process_tool_call(tc, servers, quiet_mode)
                     if result:
                         conversation.append(result)
-                        logger.info(f"Added tool result: {json.dumps(result, indent=2)}")
+                        logging.info(f"Added tool result: {json.dumps(result, indent=2)}")
 
             return final_text
         finally:

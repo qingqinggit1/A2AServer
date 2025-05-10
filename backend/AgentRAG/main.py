@@ -47,7 +47,7 @@ def main(host, port, agent_prompt_file, model_name, provider, mcp_config_path):
                 description="能够进行检索问答的助手",
                 tags=["rag", "qa"],
                 examples=[
-                    "什么是LNG？"
+                    "解释下LNG"
                 ]
             )
         # 包括 agent 的名字、描述、接口 URL、支持的输入输出格式、版本号等
