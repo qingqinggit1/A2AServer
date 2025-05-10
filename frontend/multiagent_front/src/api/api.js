@@ -38,8 +38,7 @@ export const listRemoteAgents = async () => {
 export const addRemoteAgent = async (agentAddress) => {
   try {
     // Assuming backend endpoint like '/register_agent' expecting POST with address
-    // based on ConversationClient(server_url).register_agent()
-    const response = await fetch(`${SERVER_URL}/register_agent`, { // Adjust endpoint as needed
+    const response = await fetch(`${SERVER_URL}/agent/register`, { // Adjust endpoint as needed
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
