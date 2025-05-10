@@ -58,7 +58,7 @@ Options:
 ```json
 {
   "mcpServers": {
-    "SearchTool": {
+    "RAGTool": {
       "command": "uv",
       "args": [
         "run",
@@ -69,6 +69,7 @@ Options:
         "mcpserver/rag_tool.py"
       ]
     }
+  }
 }
 
 ```

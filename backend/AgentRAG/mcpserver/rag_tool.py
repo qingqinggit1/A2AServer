@@ -12,7 +12,7 @@ import random
 mcp = FastMCP("RAG检索工具")
 
 @mcp.tool()
-def rag_search(query: str) -> str:
+def RAGsearch(query: str) -> str:
     """
     根据关键词对企业知识库进行搜索
     :param query: 搜索的词语和句子
@@ -29,5 +29,5 @@ def rag_search(query: str) -> str:
     return rag_result
 
 if __name__ == '__main__':
-    result = rag_search(query="LNG")
+    result = RAGsearch(query="LNG")
     print(result)
