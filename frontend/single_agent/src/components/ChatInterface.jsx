@@ -94,7 +94,7 @@ function ChatInterface({ agentCard }) {
           setError(`流式传输错误：${streamError.message}`);
           setMessages(prev => prev.map(msg =>
             msg.id === agentMessage.id
-              ? { ...msg, text: `[错误：${streamError.message}]`, isStreaming: false }
+              ? { ...msg, text: [`错误：${streamError.message}`], isStreaming: false }
               : msg
           ));
           setIsSending(false);
@@ -128,7 +128,7 @@ function ChatInterface({ agentCard }) {
             setError(`拉取最终结果出错：${finalTaskError.message}`);
             setMessages(prev => prev.map(msg =>
               msg.id === currentStreamingMessageIdRef.current
-                ? { ...msg, text: `[拉取错误：${finalTaskError.message}]`, isStreaming: false }
+                ? { ...msg, text: [`拉取错误：${finalTaskError.message}`], isStreaming: false }
                 : msg
             ));
           } finally {
@@ -165,7 +165,7 @@ function ChatInterface({ agentCard }) {
         console.error("非流式错误：", err);
         setError(`错误：${err.message}`);
         setMessages(prev => prev.map(msg =>
-          msg.id === agentMessage.id ? { ...msg, text: `[错误：${err.message}]`, isStreaming: false } : msg
+          msg.id === agentMessage.id ? { ...msg, text: [`错误：${err.message}`], isStreaming: false } : msg
         ));
       } finally {
         setIsSending(false);
@@ -203,7 +203,14 @@ function ChatInterface({ agentCard }) {
 
       <div className="flex-grow p-4 space-y-4 overflow-y-auto">
         {messages.map(msg => (
-          <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+          <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} items-start`}>
+            {msg.type === 'agent' && (
+              <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center mr-2">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+            )}
             <div className={`max-w-xl lg:max-w-2xl px-4 py-2 rounded-lg shadow ${msg.type === 'user' ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
               {msg.type === 'agent' && thinkingMessages[msg.id]?.length > 0 && (
                 <div className="mb-2">
@@ -230,6 +237,13 @@ function ChatInterface({ agentCard }) {
                 {msg.isStreaming && <span className="animate-pulse">▍</span>}
               </p>
             </div>
+            {msg.type === 'user' && (
+              <div className="w-8 h-8 rounded-full bg-indigo-300 flex items-center justify-center ml-2">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h18M5 9h14M3 17h18M5 21h14M5 3l4 3m0 0l-4 3m4-3v14" />
+                </svg>
+              </div>
+            )}
           </div>
         ))}
         <div ref={messagesEndRef} />
