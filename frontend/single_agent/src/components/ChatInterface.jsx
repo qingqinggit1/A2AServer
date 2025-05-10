@@ -187,44 +187,56 @@ function ChatInterface({ agentCard }) {
   }, [messages, thinkingMessages]);
 
   if (!agentCard) {
-    return <div className="text-center p-4 text-gray-500">请先选择一个智能体以开始聊天。</div>;
+    return <div className="p-6 text-center text-gray-500 text-lg font-medium bg-white rounded-xl shadow-lg">请先选择一个智能体以开始聊天。</div>;
   }
 
   if (!sessionId) {
-    return <div className="text-center p-4 text-gray-500">正在生成会话 ID...</div>;
+    return <div className="p-6 text-center text-gray-500 text-lg font-medium bg-white rounded-xl shadow-lg">正在生成会话 ID...</div>;
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-280px)] max-h-[700px] border rounded-lg shadow-md bg-white">
-      <div className="p-4 border-b">
-        <h2 className="text-xl font-semibold text-gray-800">与 {agentCard.name} 聊天</h2>
-        <p className="text-xs text-gray-500">会话 ID（Base64）：<code className="bg-gray-100 p-0.5 rounded">{sessionId.substring(0, 30)}...</code></p>
+    <div className="flex flex-col h-[calc(100vh-300px)] max-h-[750px] bg-white rounded-xl shadow-lg overflow-hidden">
+      <div className="p-6 bg-gray-50 border-b border-gray-200">
+        <h2 className="text-2xl font-bold text-gray-800">Chat with {agentCard.name}</h2>
+        <p className="text-sm text-gray-500 mt-1">
+          Session ID (Base64):{' '}
+          <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">{sessionId.substring(0, 30)}...</code>
+        </p>
       </div>
 
-      <div className="flex-grow p-4 space-y-4 overflow-y-auto">
+      <div className="flex-grow p-6 space-y-6 overflow-y-auto bg-gray-50">
         {messages.map(msg => (
           <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} items-start`}>
             {msg.type === 'agent' && (
-              <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center mr-2">
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
+                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
             )}
-            <div className={`max-w-xl lg:max-w-2xl px-4 py-2 rounded-lg shadow ${msg.type === 'user' ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
+            <div
+              className={`max-w-3xl px-4 py-3 rounded-2xl shadow-md ${
+                msg.type === 'user' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-800'
+              }`}
+            >
               {msg.type === 'agent' && thinkingMessages[msg.id]?.length > 0 && (
-                <div className="mb-2">
+                <div className="mb-3">
                   <button
                     onClick={() => toggleThinkingCollapse(msg.id)}
-                    className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center"
+                    className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center font-medium"
                   >
-                    {isThinkingCollapsed[msg.id] ? '展开思考过程' : '收起思考过程'}
-                    <svg className={`w-4 h-4 ml-1 transform ${isThinkingCollapsed[msg.id] ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {isThinkingCollapsed[msg.id] ? 'Show Thought Process' : 'Hide Thought Process'}
+                    <svg
+                      className={`w-4 h-4 ml-1 transform ${isThinkingCollapsed[msg.id] ? '' : 'rotate-180'}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
                   {!isThinkingCollapsed[msg.id] && (
-                    <div className="mt-2 p-2 bg-gray-100 rounded text-sm text-gray-600">
+                    <div className="mt-2 p-3 bg-gray-100 rounded-lg text-sm text-gray-600">
                       {thinkingMessages[msg.id].map((thought, index) => (
                         <p key={index} className="whitespace-pre-wrap">{thought}</p>
                       ))}
@@ -232,14 +244,14 @@ function ChatInterface({ agentCard }) {
                   )}
                 </div>
               )}
-              <p className="whitespace-pre-wrap">
-                {msg.text || (msg.isStreaming && !msg.text ? '思考中...' : '')}
+              <p className="whitespace-pre-wrap text-base">
+                {msg.text || (msg.isStreaming && !msg.text ? 'Thinking...' : '')}
                 {msg.isStreaming && <span className="animate-pulse">▍</span>}
               </p>
             </div>
             {msg.type === 'user' && (
-              <div className="w-8 h-8 rounded-full bg-indigo-300 flex items-center justify-center ml-2">
-                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center ml-3">
+                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h18M5 9h14M3 17h18M5 21h14M5 3l4 3m0 0l-4 3m4-3v14" />
                 </svg>
               </div>
@@ -249,23 +261,30 @@ function ChatInterface({ agentCard }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {error && <div className="p-3 border-t bg-red-50 text-red-700 text-sm">{error}</div>}
+      {error && (
+        <div className="p-4 border-t bg-red-50 text-red-700 text-base font-medium">
+          {error}
+        </div>
+      )}
 
-      <form onSubmit={handleSendMessage} className="p-4 border-t flex items-center space-x-2 bg-gray-50">
+      <form
+        onSubmit={handleSendMessage}
+        className="p-4 border-t flex items-center space-x-3 bg-white"
+      >
         <input
           type="text"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="请输入你的问题..."
-          className="flex-grow p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          placeholder="Type your message..."
+          className="flex-grow p-3 border border-gray-200 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-base placeholder-gray-400 disabled:bg-gray-100"
           disabled={isSending || !agentCard}
         />
         <button
           type="submit"
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
           disabled={isSending || !prompt.trim() || !agentCard}
         >
-          {isSending ? '发送中...' : '发送'}
+          {isSending ? 'Sending...' : 'Send'}
         </button>
       </form>
     </div>
