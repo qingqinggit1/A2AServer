@@ -60,7 +60,7 @@ Options:
   --help             Show this message and exit.
 
 
-## 使用Stdio模式代替SSE模式启动MCP server， 推荐搭配server-sequential-thinking进行深度搜索
+## 启动MCP server的方式2: 使用Stdio模式代替SSE模式启动MCP server， 推荐搭配server-sequential-thinking进行深度搜索
 ```json
 {
   "mcpServers": {

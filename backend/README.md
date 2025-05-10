@@ -17,3 +17,7 @@ DeepSearch
      └── search_tool.py  # 某个MCP工具，可以有多个工具，
 └── prompt.txt  #Agent的Prompt文件
 ```
+
+
+# 注意
+mcp_config.json中的工具的名称需要使用没有下划线的分隔符，否则不能找到工具，建议SearchTool或者RAGTool等，不要使用Search_Tool或者RAG_Tool等

@@ -1,22 +1,7 @@
 {
   "mcpServers": {
-    "SearchTool": {
-      "command": "uv",
-      "args": [
-        "run",
-        "--with",
-        "fastmcp",
-        "fastmcp",
-        "run",
-        "mcpserver/search_tool.py"
-      ]
-    },
-    "sequentialThinking": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
+    "RAGTool": {
+      "url": "http://127.0.0.1:7002/sse"
     }
   }
 }

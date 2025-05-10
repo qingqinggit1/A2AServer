@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 @click.command(help="启动 A2A Server，用于加载智能 Agent 并响应任务请求")
 @click.option("--host", "host", default="localhost", help="服务器绑定的主机名（默认为 localhost）")
-@click.option("--port", "port", default=10004,help="服务器监听的端口号（默认为 10004）")
+@click.option("--port", "port", default=10005,help="服务器监听的端口号（默认为 10005）")
 @click.option("--prompt", "agent_prompt_file", default="prompt.txt",help="Agent 的 prompt 文件路径（默认为 prompt.txt）")
 @click.option("--model", "model_name", default="deepseek-chat",help="使用的模型名称（如 deepseek-chat）")
 @click.option("--provider", "provider", default="deepseek", help="模型提供方名称（如 deepseek、openai 等）")
@@ -42,18 +42,18 @@ def main(host, port, agent_prompt_file, model_name, provider, mcp_config_path):
         # 定义 Agent 能力和技能,  功能（支持流式响应）
         capabilities = AgentCapabilities(streaming=True)
         skill = AgentSkill(
-                id="DeepSearch",
-                name="DeepSearch",
-                description="深度搜索和研究问题",
-                tags=["search", "todo"],
+                id="RAGAssistant",
+                name="RAGAssistant",
+                description="能够进行检索问答的助手",
+                tags=["rag", "qa"],
                 examples=[
-                    "帮我分析下小米公司发展情况？"
+                    "什么是LNG？"
                 ]
             )
         # 包括 agent 的名字、描述、接口 URL、支持的输入输出格式、版本号等
         agent_card = AgentCard(
-            name="DeepSearch",
-            description="深度搜索研究",
+            name="RAGAssistant",
+            description="能够进行检索问答的助手",
             url=f"http://{host}:{port}/",
             version="1.0.0",
             defaultInputModes=input_mode,

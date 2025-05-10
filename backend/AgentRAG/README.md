@@ -13,36 +13,30 @@ cp env_template.txt .env
 
 ### 4.1 自定义mcp server
 创建mcpserver目录，并在里面添加mcp server的文件
-search_tool.py
+注意本工具里面是模拟搜索，不是真正的搜索，你需要修改你的真正的MCP工具代码
+rag_tool.py  
 
 ### 4.2 启动mcp server
 cd mcpserver
-fastmcp run --transport sse --port 7001 search_tool.py
+fastmcp run --transport sse --port 7002 rag_tool.py
 
-### 4.2 修改mcp_config.json, 搭配server-sequential-thinking进行深度搜索效果更好
+### 4.2 修改mcp_config.json
 ```json
 {
   "mcpServers": {
-    "SearchTool": {
-      "url": "http://127.0.0.1:7001/sse"
-    },
-    "sequentialThinking": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
+    "RAGTool": {
+      "url": "http://127.0.0.1:7002/sse"
     }
   }
 }
 ```
 
 ## 5. 启动A2A的server端服务
-python main.py
+python main.py --port 10005
 
 ## 6. 测试
 使用client.py进行测试A2A的server端
-python client.py --agent http://localhost:10004
+python client.py --agent http://localhost:10005
 
 # 帮助命令
 python main.py --help
@@ -60,7 +54,7 @@ Options:
   --help             Show this message and exit.
 
 
-## 使用Stdio模式代替SSE模式启动MCP server， 推荐搭配server-sequential-thinking进行深度搜索
+## 启动MCP server的方式2: 使用Stdio模式代替SSE模式启动MCP server
 ```json
 {
   "mcpServers": {
@@ -72,17 +66,9 @@ Options:
         "fastmcp",
         "fastmcp",
         "run",
-        "mcpserver/search_tool.py"
-      ]
-    },
-    "sequentialThinking": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
+        "mcpserver/rag_tool.py"
       ]
     }
-  }
 }
 
 ```
