@@ -37,9 +37,12 @@ fastmcp run --transport sse --port 7001 search_tool.py
 }
 ```
 
-## 5. 启动服务
+## 5. 启动A2A的server端服务
 python main.py
 
+## 6. 测试
+使用client.py进行测试A2A的server端
+python client.py --agent http://localhost:10004
 
 # 帮助命令
 python main.py --help
