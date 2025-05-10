@@ -1,0 +1,399 @@
+import logging
+import os
+import traceback
+import json
+import base64
+from dotenv import load_dotenv
+from typing import AsyncIterable, Any, Literal
+from pydantic import BaseModel
+from tool_parameters_dict import MATCH_TOOL_PARAMETERS
+from datetime import datetime
+
+from mcp_client.client import *
+
+logger = logging.getLogger(__name__)
+
+
+def base64_to_dict(base64_str: str) -> dict:
+    """将 Base64 字符串还原为 Python 字典"""
+    try:
+        json_bytes = base64.b64decode(base64_str)
+        json_str = json_bytes.decode('utf-8')
+        data = json.loads(json_str)
+    except Exception as e:
+          print(f"Error decoding Base64: {e}")
+          return {}
+    return data
+
+class BasicAgent:
+    """Agent to access Deep Search"""
+
+    SUPPORTED_CONTENT_TYPES = ["text", "text/plain"]
+
+    def __init__(self, config_path="mcp_config.json", model_name="deepseek-chat",prompt_file="prompt.txt", provider="deepseek",
+                 quiet_mode=False, log_messages_path=None):
+        """
+        Synchronous initialization.
+        Loads config and sets up basic attributes.
+        Asynchronous setup (starting servers, listing tools) is done in the 'setup' method.
+        """
+        self.config_path = config_path
+        self.model_name = model_name
+        self.quiet_mode = quiet_mode
+        self.log_messages_path = log_messages_path
+
+        self.file = load_mcp_config_from_file(config_path)
+        config = self.file
+        self.servers_cfg = config.get("mcpServers", {})
+        self.models_cfg = config.get("models", [])
+        assert os.path.exists(prompt_file), f"Agent prompt file 必须存在，请检查: {prompt_file}"
+        # Choose a model (synchronous)
+        self.chosen_model = {"model": model_name, "provider": provider, "prompt_file": prompt_file}
+        self.is_ready = True
+
+        # Initialize attributes that will be populated asynchronously in setup()
+        self.servers = {}
+        self.all_functions = []
+        self.conversation = [] # Initial conversation might be built later in run() or here
+        self.tool_ready = False
+
+    def _choose_model(self, model_name):
+        # Helper method for model selection logic (synchronous)
+        chosen_model = None
+        for m in self.models_cfg:
+         if m.get("model") == model_name or m.get("title") == model_name:
+             chosen_model = m
+             break
+        if not chosen_model:
+         for m in self.models_cfg:
+             if m.get("default"):
+                 chosen_model = m
+                 break
+        print(f"Chosen model: {chosen_model}")
+        return chosen_model
+
+
+    async def setup_tools(self):
+        """
+        Asynchronous setup method.
+        Starts servers and gathers tools.
+        Returns True if setup was successful, False otherwise.
+        """
+        if not self.is_ready:
+             print("Agent cannot be set up: Model not found.")
+             return False
+
+        print("Starting MCP servers...")
+        successful_servers = {}
+        all_functions = []
+        # 初始化MCP的server
+        for server_name, conf in self.servers_cfg.items():
+            client = None
+            if "url" in conf:  # SSE server
+                client = SSEMCPClient(server_name, conf["url"])
+            elif "command" in conf:  # Local process-based server
+                 client = MCPClient(
+                     server_name=server_name,
+                     command=conf.get("command"),
+                     args=conf.get("args", []),
+                     env=conf.get("env", {})
+                 )
+            else:
+                 if not self.quiet_mode:
+                     print(f"[WARN] Skipping server {server_name}: No 'url' or 'command' specified.")
+                 continue
+
+            try:
+                ok = await client.start() # <-- AWAIT is valid here (inside async def)
+                if not ok:
+                    if not self.quiet_mode:
+                        print(f"[WARN] Could not start server {server_name}")
+                    # Ensure client is stopped even if start failed
+                    if client: await client.stop()
+                    continue
+                else:
+                    print(f"[MCP Tool OK] {server_name}")
+                    successful_servers[server_name] = client
+
+                    # gather tools
+                    try:
+                         tools = await client.list_tools() # <-- AWAIT is valid here
+                         for t in tools:
+                             input_schema = t.get("inputSchema") or {"type": "object", "properties": {}}
+                             fn_def = {
+                                 "name": f"{server_name}_{t['name']}",
+                                 "description": t.get("description", ""),
+                                 "parameters": input_schema
+                             }
+                             all_functions.append(fn_def)
+                    except Exception as e:
+                        if not self.quiet_mode:
+                            print(f"[WARN] Error listing tools for {server_name}: {e}")
+                        # Consider if failing to list tools should stop processing for this server
+
+
+            except Exception as e: # Catch potential errors during client creation or start
+                if not self.quiet_mode:
+                    print(f"[WARN] Exception starting server {server_name}: {e}")
+                # Ensure client is stopped if created before exception
+                if 'client' in locals() and client: await client.stop()
+
+
+        self.servers = successful_servers
+        self.all_functions = all_functions
+
+        if not self.servers:
+            error_msg = "No MCP servers could be started."
+            print(f"[ERROR] {error_msg}")
+            self.tool_ready = False # Cannot run without servers
+            return False
+
+        print(f"Found {len(self.all_functions)} tools.")
+        self.tool_ready = True # Setup was successful
+        return True
+
+    async def run_inference(self, user_query, sessionId, stream=True):
+        """
+        推理和工具的设置
+        """
+        if not self.tool_ready:
+            #  如果没设置过相关的MCP工具
+            await self.setup_tools()
+        if not self.is_ready:
+             print("Agent is not ready. Setup failed or model not found.")
+             # Depending on requirements, you might return an error or raise an exception
+             if stream:
+                  async def error_gen(): yield "Agent setup failed."
+                  return error_gen()
+             return "Agent setup failed."
+
+
+        # Build initial conversation (system message + user query)
+        self._build_initial_conversation(user_query) # This helper can be synchronous
+
+
+        # try:
+        if stream:
+            return self._stream_response_generator(sessionId) # Returns an async generator
+        else:
+            return await self._non_stream_response() # Returns the final text
+        # finally:
+        #     # Ensure cleanup is called when run() finishes or an exception occurs
+        #     await self.cleanup() # <-- AWAIT is valid here
+
+    def _build_initial_conversation(self, user_query):
+         # Helper method to build the initial conversation list (synchronous)
+         self.conversation = []
+         # 默认的prompt
+         agent_prompt = "You are a helpful assistant."
+         try:
+             with open(self.chosen_model["prompt_file"], "r", encoding="utf-8") as f:
+                 agent_prompt = f.read()
+             self.conversation.append({"role": "system", "content": agent_prompt})
+         except Exception as e:
+             logger.warning(f"Failed to read Agent prompt file: {e}")
+             self.conversation.append({"role": "system", "content": agent_prompt})
+        # 加上当前的时间
+         self.conversation[0]['content'] = f"当前时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}。" + self.conversation[0]['content']
+         self.conversation.append({"role": "user", "content": user_query})
+         print(f"发起的conversation: {self.conversation}")
+
+    def modify_match_function_parameters(self, tc, sessionId):
+        """
+        修改函数中的需要被替换的参数
+        :param tc:  {'function': {'arguments': '{"keyword": "LNG"}', 'name': 'knowledgeRetrieval_query_RAG_by_keyword'}, 'id': 'call_0_468c03da-b7ee-40f9-9443-336822ad3f72', 'type': 'function'}
+        :return:
+        """
+        print(f"modify_match_function_parameters：检查是否需要对工具进行参数的修改, sessionId: {sessionId}, 参数是: {tc}")
+        # 工具在要进行修改参数的列表中，那么就修改工具的参数
+        function_name = tc["function"]["name"]
+        if function_name in MATCH_TOOL_PARAMETERS:
+            try:
+                change_parameters = MATCH_TOOL_PARAMETERS[function_name]  # 需要修改的参数名称有哪些
+                rag_parameters = base64_to_dict(sessionId)  # rag_parameters是参数的值
+                print(
+                    f"函数{function_name}的参数要被MCP调用之前进行额外的修改, 需要修改的参数是: {change_parameters}, 通过sessionId传入的参数是:{rag_parameters}")
+                # 额外添加tc的function中的arguments中的值
+                fc_arguments = tc["function"]["arguments"]
+                fc_arguments_dict = json.loads(fc_arguments)
+                for change_parameter in change_parameters:
+                    if change_parameter in rag_parameters:
+                        fc_arguments_dict[change_parameter] = rag_parameters[change_parameter]
+                    else:
+                        print(f"Warning: {function_name}中的参数需要被修改，但是用户的sessionId中没有传入对应的参数: {sessionId}")
+                # 变回字符串
+                tc["function"]["arguments"] = json.dumps(fc_arguments_dict, ensure_ascii=False)
+                return tc
+            except Exception as e:
+                print(f"Error: 错误， 进行参数修改时发生了错误, {e}，不对参数进行修改")
+                return tc
+        else:
+            print(f"调用的工具{function_name}不需要进行额外的修改，因为没有匹配到MATCH_TOOL_PARAMETERS")
+            return tc
+
+    async def _stream_response_generator(self, sessionId):
+         """Handles the streaming response logic (async generator)."""
+         # Move the stream logic from original init here
+         while True:
+             generator = await generate_text(self.conversation, self.chosen_model, self.all_functions, stream=True)
+             accumulated_text = ""
+             tool_calls_processed = False
+
+             async for chunk in generator: # AWAIT is used to iterate over the async generator
+                 if chunk.get("is_chunk", False):
+                     if chunk.get("token", False):
+                         yield chunk["assistant_text"] # YIELD is used in a generator
+                     accumulated_text += chunk["assistant_text"]
+                 else:
+                     remaining = chunk["assistant_text"][len(accumulated_text):]
+                     if remaining:
+                         yield remaining # YIELD here as well
+
+                     tool_calls = chunk.get("tool_calls", [])
+                     if tool_calls:
+                         for tc in tool_calls:
+                             tc["type"] = "function"
+                         assistant_message = {
+                             "role": "assistant",
+                             "content": chunk["assistant_text"],
+                             "tool_calls": tool_calls
+                         }
+                         self.conversation.append(assistant_message)
+                         yield f"Tool:CALL:{json.dumps(tool_calls, ensure_ascii=False)}"
+
+                         for tc in tool_calls:
+                             if tc.get("function", {}).get("name"):
+                                 # 对工具进行参数的修改
+                                 tc = self.modify_match_function_parameters(tc, sessionId)
+                                 result = await process_tool_call(tc, self.servers, self.quiet_mode) # AWAIT valid here
+                                 if result:
+                                     self.conversation.append(result)
+                                     tool_calls_processed = True
+                                     yield f"Tool:RESULT:{json.dumps(result)}"
+             if not tool_calls_processed:
+                 break
+
+
+    async def _non_stream_response(self):
+         """Handles the non-streaming response logic."""
+         # Move the non-stream logic from original init here
+         final_text = ""
+         while True:
+             gen_result = await generate_text(self.conversation, self.chosen_model, self.all_functions, stream=False) # AWAIT valid here
+
+             assistant_text = gen_result["assistant_text"]
+             final_text = assistant_text
+             tool_calls = gen_result.get("tool_calls", [])
+
+             assistant_message = {"role": "assistant", "content": assistant_text}
+             if tool_calls:
+                 for tc in tool_calls:
+                     tc["type"] = "function"
+                 assistant_message["tool_calls"] = tool_calls
+             self.conversation.append(assistant_message)
+             logger.info(f"Added assistant message: {json.dumps(assistant_message, indent=2)}")
+
+             if not tool_calls:
+                 break
+
+             for tc in tool_calls:
+                 result = await process_tool_call(tc, self.servers, self.quiet_mode) # AWAIT valid here
+                 if result:
+                     self.conversation.append(result)
+                     logger.info(f"Added tool result: {json.dumps(result, indent=2)}")
+
+         return final_text
+
+
+    async def cleanup(self):
+        """Clean up servers and log messages."""
+        print("Cleaning up servers...")
+        if self.log_messages_path:
+            # Pass attributes needed for logging
+            await log_messages_to_file(self.conversation, self.all_functions, self.log_messages_path) # AWAIT valid here
+        for cli in self.servers.values():
+            await cli.stop() # AWAIT valid here
+        print("Cleanup complete.")
+
+    def get_agent_response(self, response: str) -> dict[str, Any]:
+        """Format agent response in a consistent structure."""
+        try:
+            # All final responses should be treated as complete
+            return {
+                "is_task_complete": True,
+                "require_user_input": False,
+                "content": response
+            }
+        except Exception as e:
+            # Log but continue with best-effort fallback
+            logger.error(f"Error parsing response: {e}, response: {response}")
+
+            # Default to treating it as a completed response
+            return {
+                "is_task_complete": True,
+                "require_user_input": False,
+                "content": response
+            }
+
+    async def stream(self, query: str, sessionId: str) -> AsyncIterable[dict[str, Any]]:
+        """Stream updates from the MCP agent.
+        # sessionId作为知识库的关联信息, 重新初始化知识库的mcpClient
+        """
+        print(f"问题: {query}的sessionId为： {sessionId}")
+        try:
+            # Initial response to acknowledge the query
+            yield {
+                "is_task_complete": False,
+                "require_user_input": False,
+                "updates": "Processing request..."
+            }
+
+            logger.info(f"Processing query: {query[:50]}...")
+
+            try:
+
+                response_generator = await self.run_inference(
+                    user_query=query,
+                    sessionId=sessionId,
+                    stream=True,
+                )
+                # Iterate through the chunks yielded by the response_generator
+                chunks = []
+                async for chunk in response_generator:
+                    if not chunk.startswith('Tool:'):
+                        chunks.append(chunk)
+                        is_tool = False
+                    else:
+                        is_tool = True
+                    # Yield each chunk as it arrives.
+                    yield {
+                        "is_task_complete": False,  # Indicate it's an intermediate part
+                        "require_user_input": False,
+                        "content": chunk,  # Yield the actual content chunk
+                        "is_tool":is_tool,
+                    }
+                yield {
+                    "is_task_complete": True,  # Indicate it's an intermediate part
+                    "require_user_input": False,
+                    "content": "".join(chunks)  # Yield the actual content chunk
+                }
+            except Exception as e:
+                logger.error(f"Error during processing: {traceback.format_exc()}")
+                yield {
+                    "is_task_complete": False,
+                    "require_user_input": True,
+                    "updates": f"Error processing request: {str(e)}"
+                }
+        except Exception as e:
+            logger.error(f"Error in streaming agent: {traceback.format_exc()}")
+            yield {
+                "is_task_complete": False,
+                "require_user_input": True,
+                "updates": f"Error processing request: {str(e)}"
+            }
+
+    def invoke(self, query: str, sessionId: str) -> dict[str, Any]:
+        """Synchronous invocation of the MCP agent."""
+        raise NotImplementedError(
+            "Synchronous invocation is not supported by this agent. Use the streaming endpoint (tasks/sendSubscribe) instead."
+        )

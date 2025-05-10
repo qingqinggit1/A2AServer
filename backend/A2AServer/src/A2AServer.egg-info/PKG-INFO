@@ -1,0 +1,21 @@
+Metadata-Version: 2.4
+Name: A2AServer
+Version: 1.0.0
+Summary: A2A and MCP
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+Requires-Dist: fastmcp
+Requires-Dist: requests
+Requires-Dist: dotenv
+Requires-Dist: tenacity
+Requires-Dist: mcp
+Requires-Dist: zhipuai
+Requires-Dist: cachetools
+Requires-Dist: google-genai>=1.10.0
+
+# 创建python环境
+conda create --name adk python=3.12
+conda actiavte adk
+
+# 安装项目依赖
+pip install -e .

@@ -1,0 +1,8 @@
+fastmcp
+requests
+dotenv
+tenacity
+mcp
+zhipuai
+cachetools
+google-genai>=1.10.0
