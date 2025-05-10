@@ -1,43 +1,41 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { sendTaskStreaming, sendTaskNonStreaming, getTaskResult } from '../services/a2aApiService';
-import { dictToBase64 } from '../utils/encoding';
-
-// 默认会话数据结构
-const DEFAULT_SESSION_DATA = {
-  knowledge_base_id: [193],
-  file_id: ['326', '325'],
-  business_source: "知识库管理",
-  qa_type: "公域和私域结合",
-  history: [],
-  is_extend_questions: false,
-  is_source_documents: true,
-  is_deepseek: false,
-};
 
 function ChatInterface({ agentCard }) {
   const [prompt, setPrompt] = useState('');
-  const [messages, setMessages] = useState([]); // 聊天消息列表
+  const [messages, setMessages] = useState([]);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState(null);
   const currentStreamingMessageIdRef = useRef(null);
   const abortStreamingRef = useRef(null);
   const [sessionId, setSessionId] = useState('');
+  const [thinkingMessages, setThinkingMessages] = useState({});
+  const [isThinkingCollapsed, setIsThinkingCollapsed] = useState({});
 
-  // 当组件挂载或 agentCard 更换时，生成新的 sessionId
   useEffect(() => {
-    const base64SessionData = dictToBase64(DEFAULT_SESSION_DATA);
-    setSessionId(base64SessionData);
-    setMessages([]); // 切换 agent 时清空历史消息
+    setSessionId(uuidv4());
+    setMessages([]);
+    setThinkingMessages({});
+    setIsThinkingCollapsed({});
   }, [agentCard]);
 
-  // 发送消息处理逻辑
+  const toggleThinkingCollapse = (messageId) => {
+    setIsThinkingCollapsed(prev => ({
+      ...prev,
+      [messageId]: !prev[messageId]
+    }));
+  };
+
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!prompt.trim() || !agentCard || !sessionId) return;
 
     const userMessage = { id: uuidv4(), type: 'user', text: prompt };
-    setMessages(prev => [...prev, userMessage]);
+    const agentMessage = { id: uuidv4(), type: 'agent', text: '', isStreaming: true, thinking: [] };
+    setMessages(prev => [...prev, userMessage, agentMessage]);
+    setThinkingMessages(prev => ({ ...prev, [agentMessage.id]: [] }));
+    setIsThinkingCollapsed(prev => ({ ...prev, [agentMessage.id]: false }));
     setPrompt('');
     setIsSending(true);
     setError(null);
@@ -56,39 +54,49 @@ function ChatInterface({ agentCard }) {
     };
 
     if (agentCard.capabilities.streaming) {
-      // 流式响应
-      const agentStreamingMessage = { id: uuidv4(), type: 'agent', text: '', isStreaming: true };
-      currentStreamingMessageIdRef.current = agentStreamingMessage.id;
-      setMessages(prev => [...prev, agentStreamingMessage]);
+      currentStreamingMessageIdRef.current = agentMessage.id;
 
       abortStreamingRef.current = sendTaskStreaming(
         agentEndpointUrl,
         payload,
         (streamEvent) => {
           console.log("接收到流事件：", streamEvent);
-          if (streamEvent.result?.status?.message) {
+          if (streamEvent.result?.status?.state === "working" && streamEvent.result?.status?.message) {
             streamEvent.result.status.message.parts.forEach(part => {
               if (part.type === "text" && part.text) {
-                setMessages(prev => prev.map(msg => (
-                  { ...msg, text: msg.text + part.text }
-                )));
+                setThinkingMessages(prev => ({
+                  ...prev,
+                  [agentMessage.id]: [...(prev[agentMessage.id] || []), part.text]
+                }));
               }
             });
+          } else if (streamEvent.result?.status?.state === "completed" && streamEvent.result?.status?.message) {
+            let finalText = "";
+            streamEvent.result.status.message.parts.forEach(part => {
+              if (part.type === "text" && part.text) {
+                finalText += part.text;
+              }
+            });
+            setMessages(prev => prev.map(msg =>
+              msg.id === agentMessage.id ? { ...msg, text: finalText, isStreaming: false } : msg
+            ));
           }
 
           if (streamEvent.result?.final) {
-            setMessages(prev => prev.map(msg => (
-              { ...msg, isStreaming: false }
-            )));
+            setMessages(prev => prev.map(msg =>
+              msg.id === agentMessage.id ? { ...msg, isStreaming: false } : msg
+            ));
             setIsSending(false);
           }
         },
         (streamError) => {
           console.error("流式传输错误：", streamError);
           setError(`流式传输错误：${streamError.message}`);
-          setMessages(prev => prev.map(msg => (
-            { ...msg, text: msg.text + `\n[错误：${streamError.message}]`, isStreaming: false }
-          )));
+          setMessages(prev => prev.map(msg =>
+            msg.id === agentMessage.id
+              ? { ...msg, text: `[错误：${streamError.message}]`, isStreaming: false }
+              : msg
+          ));
           setIsSending(false);
         },
         async () => {
@@ -107,18 +115,22 @@ function ChatInterface({ agentCard }) {
                   finalText += part.text;
                 }
               });
-              setMessages(prev => prev.map(msg => (
-                { ...msg, text: msg.text + "\n\n" + finalText, isStreaming: false }
-              )));
+              setMessages(prev => prev.map(msg =>
+                msg.id === currentStreamingMessageIdRef.current
+                  ? { ...msg, text: finalText, isStreaming: false }
+                  : msg
+              ));
             } else if (finalTaskResponse.error) {
               throw new Error(`最终任务出错：${finalTaskResponse.error.message}`);
             }
           } catch (finalTaskError) {
             console.error("拉取最终任务出错：", finalTaskError);
             setError(`拉取最终结果出错：${finalTaskError.message}`);
-            setMessages(prev => prev.map(msg => (
-              { ...msg, text: msg.text + `\n[拉取错误：${finalTaskError.message}]`, isStreaming: false }
-            )));
+            setMessages(prev => prev.map(msg =>
+              msg.id === currentStreamingMessageIdRef.current
+                ? { ...msg, text: `[拉取错误：${finalTaskError.message}]`, isStreaming: false }
+                : msg
+            ));
           } finally {
             setIsSending(false);
             currentStreamingMessageIdRef.current = null;
@@ -127,11 +139,9 @@ function ChatInterface({ agentCard }) {
         }
       );
     } else {
-      // 非流式响应
       try {
         const initialResponse = await sendTaskNonStreaming(agentEndpointUrl, payload);
         let agentResponseText = "处理中...";
-        const agentMessageId = uuidv4();
 
         if (initialResponse.error) {
           throw new Error(`Agent 错误：${initialResponse.error.message}`);
@@ -148,18 +158,21 @@ function ChatInterface({ agentCard }) {
           }
         }
 
-        setMessages(prev => [...prev, { id: agentMessageId, type: 'agent', text: agentResponseText, isStreaming: false }]);
+        setMessages(prev => prev.map(msg =>
+          msg.id === agentMessage.id ? { ...msg, text: agentResponseText, isStreaming: false } : msg
+        ));
       } catch (err) {
         console.error("非流式错误：", err);
         setError(`错误：${err.message}`);
-        setMessages(prev => [...prev, { id: uuidv4(), type: 'agent', text: `[错误：${err.message}]`, isStreaming: false }]);
+        setMessages(prev => prev.map(msg =>
+          msg.id === agentMessage.id ? { ...msg, text: `[错误：${err.message}]`, isStreaming: false } : msg
+        ));
       } finally {
         setIsSending(false);
       }
     }
   };
 
-  // 卸载时清理流式连接
   useEffect(() => {
     return () => {
       if (abortStreamingRef.current) {
@@ -168,11 +181,10 @@ function ChatInterface({ agentCard }) {
     };
   }, []);
 
-  // 自动滚动到底部
   const messagesEndRef = useRef(null);
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, thinkingMessages]);
 
   if (!agentCard) {
     return <div className="text-center p-4 text-gray-500">请先选择一个智能体以开始聊天。</div>;
@@ -193,8 +205,28 @@ function ChatInterface({ agentCard }) {
         {messages.map(msg => (
           <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-xl lg:max-w-2xl px-4 py-2 rounded-lg shadow ${msg.type === 'user' ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
+              {msg.type === 'agent' && thinkingMessages[msg.id]?.length > 0 && (
+                <div className="mb-2">
+                  <button
+                    onClick={() => toggleThinkingCollapse(msg.id)}
+                    className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center"
+                  >
+                    {isThinkingCollapsed[msg.id] ? '展开思考过程' : '收起思考过程'}
+                    <svg className={`w-4 h-4 ml-1 transform ${isThinkingCollapsed[msg.id] ? '' : 'rotate-180'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {!isThinkingCollapsed[msg.id] && (
+                    <div className="mt-2 p-2 bg-gray-100 rounded text-sm text-gray-600">
+                      {thinkingMessages[msg.id].map((thought, index) => (
+                        <p key={index} className="whitespace-pre-wrap">{thought}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
               <p className="whitespace-pre-wrap">
-                {msg.text}
+                {msg.text || (msg.isStreaming && !msg.text ? '思考中...' : '')}
                 {msg.isStreaming && <span className="animate-pulse">▍</span>}
               </p>
             </div>

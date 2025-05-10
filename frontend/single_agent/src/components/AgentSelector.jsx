@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 const PRESET_AGENTS = [
   { name: "LNG Agent", url: "http://localhost:10003" },
   { name: "Deep Search", url: "http://localhost:10004" },
+  { name: "Agent RAG", url: "http://localhost:10005" },
   // Add more preset agents here
   // { name: "Remote Agent (Example)", url: "http://10.228.32.77:10009" },
 ];

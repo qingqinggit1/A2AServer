@@ -1,6 +1,6 @@
 {
   "homepage": "https://minitool.fun",
-  "name": "minitool",
+  "name": "single_agent",
   "private": true,
   "version": "0.0.0",
   "type": "module",
