@@ -95,7 +95,7 @@ cd backend/DeepSearch
 python main.py --port 10004
 ```
 
-#### 2. Start Host Agent
+#### 3. Start Host Agent
 The host agent coordinates multiple A2A agents, manages their states, and decides which agent to use.
 ```bash
 cd frontend/hostAgentAPI
@@ -103,7 +103,7 @@ pip install -r requirements.txt
 python api.py
 ```
 
-#### 3. Start Frontend
+#### 4. Start Frontend
 ```bash
 cd frontend/multiagent_front
 npm install
@@ -111,6 +111,8 @@ npm run dev
 ```
 - Open the frontend in your browser, add agents, and start interacting via the Q&A interface.
 
+#### 5. UI Example
+![MultiAgentHomePage](docs/images/MultiAgentHomePage.png)
 
 ## Multi-Agent Call Flow
 ```mermaid
