@@ -1,6 +1,6 @@
 # A2A-MCP Server Framework
 
-📘 [中文文档 README_ZH.md](./README_ZH.md)
+📘 [中文](./README_ZH.md)
 
 <div align="center">
 
