@@ -12,7 +12,7 @@ cp env_template.txt .env
 ## 4. MCP server的配置
 
 ### 4.1 自定义mcp server
-创建mcpserver目录，并在里面添加mcp server的文件
+创建mcpserver目录，并在里面添加mcp server的文件, 可以写多个MCP文件，在mcp_config.json中设置即可。
 search_tool.py
 
 ### 4.2 启动mcp server

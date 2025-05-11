@@ -79,24 +79,30 @@ npm run dev
 ### 多代理设置
 本节展示如何设置多代理系统，实现A2A代理之间的协作。
 
+#### 1. 启动1个Agent
+- **Agent RAG**：
+```bash
+cd backend/AgentRAG
+python main.py --port 10005
+```
 
-- **Agent DeepSearch**：
+#### 2. 启动第2个Agent
 ```bash
 cd backend/DeepSearch
 python main.py --port 10004
 ```
 
-#### 2. 启动主机代理
+#### 3. 启动主机代理（用于管理上面启动的2个Agent)
 主机代理协调多个A2A代理，管理其状态并决定使用哪个代理。
 ```bash
-cd hostAgentAPI
+cd frontend/hostAgentAPI
 pip install -r requirements.txt
 python api.py
 ```
 
-#### 3. 启动前端
+#### 4. 启动前端
 ```bash
-cd multiagent_front
+cd frontend/multiagent_front
 npm install
 npm run dev
 ```
@@ -119,6 +125,15 @@ npm install
 npm run dev
 ```
 - 在浏览器中访问前端以与单个代理交互。
+
+## 多Agent的调用流程
+```mermaid
+graph TD
+    A[客户端] --> B[API网关]
+    B --> C[认证服务]
+    B --> D[业务服务]
+    D --> E[数据库]
+```
 
 ## 📂 项目结构
 ```
