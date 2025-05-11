@@ -22,7 +22,7 @@ export const Home = () => {
               </button>
             </Link>
             <Link to="/conversations">
-              <button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition">
+              <button className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition">
                 会话记录
               </button>
             </Link>
