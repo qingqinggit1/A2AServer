@@ -71,6 +71,9 @@ npm run dev
 ```
 Open the frontend in your browser, add the agent, and start interacting through the Q&A interface.
 
+#### 3. UI Example
+![SingleAgentHome](docs/images/SingleAgentHome.png)
+
 ## Single Agent Call Flow
 ```mermaid
 graph TD

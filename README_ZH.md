@@ -77,6 +77,9 @@ npm run dev
 ```
 - 在浏览器中打开前端，添加代理，并通过问答界面开始交互。
 
+#### 3. UI示例
+![SingleAgentHome](docs/images/SingleAgentHome.png)
+
 ### 多代理设置
 本节展示如何设置多代理系统，实现A2A代理之间的协作。
 
