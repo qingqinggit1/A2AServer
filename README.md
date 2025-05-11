@@ -1,2 +1,191 @@
-# 方便使用A2A和MCP
-包含前后端代码， 单个Agent的使用，多个Agent的使用，MCP工具的自定义等。
+A2A-MCP Server Framework
+
+A Fully Compatible Implementation of Google's Agent-to-Agent (A2A) Protocol with Model Context Protocol (MCP) Integration
+
+
+🌟 Overview
+A2A-MCP Server Framework is a robust, production-ready solution that leverages Google's Agent-to-Agent (A2A) protocol and integrates seamlessly with the Model Context Protocol (MCP). This project is designed for building interoperable single and multi-agent systems with full compatibility with Google's official A2A code. It offers a clear structure, rich examples, and a full-stack, ready-to-use implementation for developers.
+Key highlights:
+
+100% A2A Compatibility: Built using Google's official A2A code for maximum interoperability.
+MCP Integration: First-class support for MCP, enabling agents to access external tools and data sources.
+Clear Structure: Well-organized project with comprehensive examples for single and multi-agent setups.
+Full-Stack Solution: Includes both backend (Python) and frontend (Node.js) components for immediate deployment.
+Rich Examples: Demonstrates practical use cases for both single-agent and multi-agent collaboration.
+
+✨ Why Choose A2A-MCP Framework?
+
+Complete A2A Implementation: Adheres strictly to the official A2A specification.
+Flexible Agent Systems: Supports both single-agent and multi-agent workflows.
+MCP Tooling: Easily integrate external tools via MCP for enhanced agent capabilities.
+Production-Ready: Robust error handling and clear documentation for enterprise use.
+Developer-Friendly: Rich examples, intuitive setup, and minimal dependencies.
+
+📦 Installation
+Prerequisites
+
+Python 3.10+
+Node.js 16+
+pip for Python dependencies
+npm for frontend dependencies
+
+Backend Setup
+
+Clone the repository:
+
+git clone https://github.com/johnson7788/A2AServer.git
+cd A2AServer
+
+Install backend dependencies:
+
+cd backend/A2AServer
+pip install -e .
+
+Frontend Setup
+
+Install frontend dependencies for multi-agent or single-agent frontend:
+
+cd multiagent_front  # or cd single_agent
+npm install
+
+🚀 Quick Start
+Multi-Agent Setup
+This section demonstrates how to set up a multi-agent system with collaboration between A2A agents.
+1. Start A2A Agents
+
+Agent RAG:
+
+cd backend/AgentRAG
+python main.py --port 10005
+
+
+Agent DeepSearch:
+
+cd backend/DeepSearch
+python main.py --port 10004
+
+2. Start Host Agent
+The host agent coordinates multiple A2A agents, manages their states, and decides which agent to use.
+cd hostAgentAPI
+pip install -r requirements.txt
+python api.py
+
+3. Start Frontend
+cd multiagent_front
+npm install
+npm run dev
+
+
+Open the frontend in your browser, add agents, and start interacting via the Q&A interface.
+
+Single-Agent Setup
+This section shows how to run a single A2A agent with a dedicated frontend.
+1. Start A2A Agent
+
+Agent RAG:
+
+cd backend/AgentRAG
+python main.py --port 10005
+
+2. Start Frontend
+cd single_agent
+npm install
+npm run dev
+
+
+Access the frontend in your browser to interact with the single agent.
+
+📂 Project Structure
+A2AServer
+├── backend
+│   ├── A2AServer           # A2A server dependencies
+│   ├── AgentRAG            # RAG-based A2A agent
+│   ├── DeepSearch          # DeepSearch A2A agent example
+│   ├── client.py           # A2A client for testing
+│   └── hostAgentAPI        # Host agent for multi-agent coordination
+├── multiagent_front        # Frontend for multi-agent collaboration
+├── single_agent            # Frontend for single-agent interaction
+└── README.md               # Project documentation
+
+🛠️ Developing Your Own A2A Server
+To create a custom A2A server, follow these steps:
+
+Copy the DeepSearch Example:
+
+cp -r backend/DeepSearch backend/MyCustomAgent
+
+
+Directory Structure:
+
+MyCustomAgent
+├── .env                # Environment file for model keys
+├── main.py             # A2A server startup script
+├── mcp_config.json     # MCP server configuration
+├── mcpserver           # MCP server code (optional)
+│   └── my_tool.py      # Custom MCP tool
+└── prompt.txt          # Agent prompt file
+
+
+Configure MCP Tools:
+
+
+Ensure tool names in mcp_config.json use camelCase (e.g., MyCustomTool) instead of underscores (e.g., My_Custom_Tool) to avoid lookup issues.
+Example mcp_config.json:
+
+{
+  "tools": [
+    {
+      "name": "MyCustomTool",
+      "description": "A custom tool for processing data",
+      "script": "mcpserver/my_tool.py"
+    }
+  ]
+}
+
+
+Run Your Server:
+
+cd backend/MyCustomAgent
+python main.py --port 10006
+
+⚠️ Notes
+
+Tool Naming: Use camelCase for tool names in mcp_config.json (e.g., SearchTool, RAGTool) to ensure compatibility.
+Environment Variables: Store API keys and sensitive data in the .env file.
+Port Conflicts: Ensure unique ports for each agent to avoid conflicts.
+
+🧩 Core Features
+
+Single-Agent Interface: Simple, intuitive UI for interacting with a single A2A agent.
+Multi-Agent Collaboration: Host agent coordinates multiple A2A agents for complex tasks.
+MCP Integration: Seamless access to external tools and data via MCP.
+Rich Examples: Comprehensive examples for both single and multi-agent setups.
+Full-Stack: Backend and frontend components for immediate deployment.
+
+🗺️ Use Cases
+
+AI-Powered Assistants: Build intelligent assistants with single or multi-agent setups.
+Research Tools: Create collaborative agent systems for data analysis or search.
+Enterprise Workflows: Coordinate multiple agents for complex business processes.
+Educational Platforms: Demonstrate agent collaboration for learning purposes.
+
+📖 Contributing
+We welcome contributions! To get started:
+
+Fork the repository.
+Create a feature branch (git checkout -b feature/my-feature).
+Commit your changes (git commit -m 'Add my feature').
+Push to the branch (git push origin feature/my-feature).
+Open a pull request.
+
+See our contributing guide for more details.
+🤝 Community & Support
+
+GitHub Issues: Report bugs or request features.
+GitHub Discussions: Ask questions and share ideas.
+
+📄 License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+Made with ❤️ by Johnson Guo
+
