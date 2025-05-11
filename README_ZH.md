@@ -116,7 +116,8 @@ npm install
 npm run dev
 ```
 - 在浏览器中打开前端，添加代理，并通过问答界面开始交互。
-
+#### 5. UI示例
+![MultiAgentHomePage](docs/images/MultiAgentHomePage.png)
 
 ## 多Agent的调用流程
 ```mermaid
