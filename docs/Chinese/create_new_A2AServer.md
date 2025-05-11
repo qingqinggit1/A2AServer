@@ -86,3 +86,6 @@ OPENAI_API_KEY=xxx
 
 # 最后，启动你的Agent
 python main.py --port 10006
+
+# 在前端中使用
+在单/多代理前端中，添加地址 http://localhost:10006，即可访问新代理。
