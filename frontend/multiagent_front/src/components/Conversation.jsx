@@ -115,13 +115,33 @@ const Conversation = () => {
                         console.log(`[${(elapsedTime / 1000).toFixed(1)}s] 获取到 ${newMessagesFromEvents.length} 条新消息`);
                         setMessages(prevMessages => {
                             const currentMessageIds = new Set(prevMessages.map(m => m.message_id));
-                            const trulyNewMessages = newMessagesFromEvents.filter(nm => !currentMessageIds.has(nm.message_id));
-
-                            if (trulyNewMessages.length > 0) {
-                                return [...prevMessages, ...trulyNewMessages].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+                            let newMessages = [...prevMessages]; // 创建数组的浅拷贝
+                        
+                            for (const nm of newMessagesFromEvents) {
+                                if (currentMessageIds.has(nm.message_id)) continue;
+                        
+                                const lastMsg = newMessages[newMessages.length - 1];
+                        
+                                const nmText = nm.content?.map(p => p[0]).join('\n').trim();
+                                const lastText = lastMsg?.content?.map(p => p[0]).join('\n').trim();
+                        
+                                if (lastMsg && nm.role === lastMsg.role && nmText === lastText) {
+                                    // 创建 lastMsg 的副本并更新 dupCount
+                                    const updatedLastMsg = { ...lastMsg, dupCount: (lastMsg.dupCount || 1) + 1 };
+                                    // 替换 newMessages 中的最后一个消息
+                                    newMessages = [
+                                        ...newMessages.slice(0, -1), // 保留除最后一个消息外的所有消息
+                                        updatedLastMsg // 添加更新后的最后一个消息
+                                    ];
+                                } else {
+                                    // 新消息，正常添加
+                                    newMessages = [...newMessages, { ...nm, dupCount: 1 }];
+                                }
                             }
-                            return prevMessages;
+                        
+                            return newMessages;
                         });
+                        
                     }
                 }
 
@@ -156,6 +176,7 @@ const Conversation = () => {
             content: [[messageContentToSend, 'text/plain']],
             metadata: { conversation_id: conversationId },
             timestamp: Date.now() / 1000,
+            dupCount: 1, // 重复次数, 默认为1，和上一条重复
         };
         setMessages((prevMessages) => [...prevMessages, userMessage]);
 
@@ -207,9 +228,10 @@ const Conversation = () => {
                         )}
                     </div>
                 ))}
-                {isSending && messages.length === 0 && (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
-                        <CircularProgress size={24} />
+                {isSending && (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 2 }}>
+                        <CircularProgress size={24} sx={{ marginRight: 1 }} />
+                        <span>正在处理...</span>
                     </Box>
                 )}
             </div>

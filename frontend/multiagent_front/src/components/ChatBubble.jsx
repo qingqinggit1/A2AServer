@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown'; // 引入 Markdown 渲染库
 import { useRecoilValue } from 'recoil';
 import { backgroundTasksState, messageAliasesState } from '../store/recoilState';
 
+//单个消息气泡组件，单条信息
 const ChatBubble = ({ message }) => {
   // --- Recoil State ---
   console.log("ChatBubble 渲染消息:", message);
@@ -98,6 +99,10 @@ const ChatBubble = ({ message }) => {
               return (
                  <div key={partKey} className={`${bubbleStyles} prose prose-sm dark:prose-invert max-w-none`}> {/* Tailwind prose 插件样式 */}
                      <ReactMarkdown children={markdownContent} />
+                     {/* 重复消息 */}
+                     {message.dupCount > 1 && (
+                      <div className="text-xs text-gray-500 ml-2">+{message.dupCount - 1}</div>
+                    )}
                  </div>
               );
           }
