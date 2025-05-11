@@ -193,6 +193,10 @@ python main.py --port 10006
 
 详情请参阅我们的[贡献指南](CONTRIBUTING.md)。
 
+## 致谢
+本项目参考并感谢以下开源项目的贡献：
+- [Google A2A 项目](https://github.com/google/A2A)
+
 ## 🤝 社区与支持
 - **[GitHub Issues](https://github.com/johnson7788/A2AServer/issues)**：报告错误或请求功能。
 - **[GitHub Discussions](https://github.com/johnson7788/A2AServer/discussions)**：提问和分享想法。
@@ -200,4 +204,4 @@ python main.py --port 10006
 ## 📄 许可证
 本项目采用MIT许可证 -  Free for all.
 
-Made with ❤️ by [Johnson GUO](https://github.com/johnson7788)
+Made with ❤️ by [Johnson Guo](https://github.com/johnson7788)

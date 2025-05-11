@@ -193,6 +193,11 @@ We welcome contributions! To get started:
 
 See our [contributing guide](CONTRIBUTING.md) for more details.
 
+## Acknowledgements
+This project draws inspiration from and gratefully acknowledges the contributions of the following open-source project:
+- [Google A2A Project](https://github.com/google/A2A)
+
+
 ## 🤝 Community & Support
 - **[GitHub Issues](https://github.com/johnson7788/A2AServer/issues)**: Report bugs or request features.
 - **[GitHub Discussions](https://github.com/johnson7788/A2AServer/discussions)**: Ask questions and share ideas.
@@ -202,4 +207,4 @@ This project is licensed under the MIT License - Free for all.
 
 ---
 
-Made with ❤️ by [Johnson GUO](https://github.com/johnson7788)
+Made with ❤️ by [Johnson Guo](https://github.com/johnson7788)
