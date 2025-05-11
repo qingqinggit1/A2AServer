@@ -219,50 +219,80 @@ const Conversation = () => {
         }
     };
 
+    // 更新后的 Conversation 组件布局
     return (
-        <div className="flex flex-col h-full p-4 space-y-2">
-            <div className="flex-grow overflow-y-auto space-y-2 pb-4">
-                {messages.map((message) => (
-                    <div key={message.message_id || uuidv4()}>
-                        {message.content.some(part => part[1] === 'form') ? (
-                            <FormRenderer message={message} />
-                        ) : (
-                            <ChatBubble message={message} />
-                        )}
-                    </div>
-                ))}
-                {isSending && (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 2 }}>
-                        <CircularProgress size={24} sx={{ marginRight: 1 }} />
-                        <span>正在处理...</span>
-                    </Box>
-                )}
+      <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
+        <div className="flex-1 overflow-hidden">
+          <div className="h-full overflow-y-auto">
+            <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
+              {messages.map((message) => (
+                <div key={message.message_id || uuidv4()} className="group">
+                  {message.content.some(part => part[1] === 'form') ? (
+                    <FormRenderer message={message} />
+                  ) : (
+                    <ChatBubble message={message} />
+                  )}
+                </div>
+              ))}
+              {isSending && (
+                <div className="flex justify-center items-center p-4 space-x-2">
+                  <CircularProgress size={24} className="text-gray-500 dark:text-gray-400" />
+                  <span className="text-gray-500 dark:text-gray-400 text-sm">思考中...</span>
+                </div>
+              )}
             </div>
-            <div className="mt-auto flex items-center pt-2 border-t border-gray-200 dark:border-gray-700">
-                <TextField
-                    fullWidth
-                    label="发送消息"
-                    variant="outlined"
-                    value={inputText}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyDown}
-                    disabled={isSending || !conversationId}
-                    InputProps={{
-                        endAdornment: (
-                            isSending && messages.length > 0 ? <CircularProgress color="inherit" size={20} sx={{ marginRight: '8px' }} /> : null
-                        )
-                    }}
-                />
-                <IconButton
-                    color="primary"
-                    onClick={handleSendMessage}
-                    disabled={isSending || !inputText.trim() || !conversationId}
-                    sx={{ marginLeft: '8px' }}
-                >
-                    <SendIcon />
-                </IconButton>
-            </div>
+          </div>
         </div>
+        
+        {/* 输入区域 */}
+        <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+          <div className="max-w-3xl mx-auto px-4 py-4">
+            <div className="flex items-end gap-2">
+              <TextField
+                fullWidth
+                multiline
+                variant="outlined"
+                placeholder="输入消息..."
+                value={inputText}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                disabled={isSending || !conversationId}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '1.5rem',
+                    padding: '0.75rem 1.5rem',
+                    backgroundColor: 'rgba(0, 0, 0, 0.02)',
+                    '&.Mui-focused': {
+                      boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.5)'
+                    }
+                  }
+                }}
+              />
+              <IconButton
+                color="primary"
+                onClick={handleSendMessage}
+                disabled={isSending || !inputText.trim() || !conversationId}
+                sx={{
+                  height: '48px',
+                  width: '48px',
+                  backgroundColor: 'rgb(59, 130, 246)',
+                  '&:hover': {
+                    backgroundColor: 'rgb(37, 99, 235)'
+                  },
+                  '&:disabled': {
+                    backgroundColor: 'rgb(229, 231, 235)'
+                  }
+                }}
+              >
+                <SendIcon className="text-white" />
+              </IconButton>
+            </div>
+            <p className="text-center text-xs text-gray-500 dark:text-gray-400 mt-2">
+              支持 Markdown 语法 • Shift + Enter 换行
+            </p>
+          </div>
+        </div>
+      </div>
     );
 };
 
