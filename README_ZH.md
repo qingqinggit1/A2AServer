@@ -42,7 +42,7 @@ A2A-MCP 服务器框架是一个健壮的、生产就绪的解决方案，利用
 ### 后端设置
 1. 克隆仓库：
 ```bash
-git clone https://github.com/johnson Kershaw on GitHub
+git clone https://github.com/johnson7788/A2AServer.git
 cd backend/A2AServer
 ```
 

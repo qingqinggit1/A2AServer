@@ -42,7 +42,7 @@ Key highlights:
 ### Backend Setup
 1. Clone the repository:
 ```bash
-git clone https://github.com/johnson7788/A2AServer
+git clone https://github.com/johnson7788/A2AServer.git
 cd backend/A2AServer
 ```
 
