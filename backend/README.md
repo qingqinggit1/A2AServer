@@ -11,6 +11,7 @@ backend
 ├── A2AServer           # Dependency package for A2A Server
 ├── DeepSearch          # Example project for deep search functionality
 ├── AgentRAG            # Example project for Agent RAG
+├── LNGExpert           # Example project for Agent flexible workflow
 └── client.py           # Client script for testing A2A Servers
 ```
 

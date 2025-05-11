@@ -1,0 +1,33 @@
+{
+  "mcpServers": {
+    "FactoryProfit": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--with",
+        "fastmcp",
+        "fastmcp",
+        "run",
+        "mcpserver/Simulate_Factory_Profit.py"
+      ]
+    },
+    "LNGPrice": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--with",
+        "fastmcp",
+        "fastmcp",
+        "run",
+        "mcpserver/Simulate_LNG_Price.py"
+      ]
+    },
+    "sequentialThinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    }
+  }
+}
