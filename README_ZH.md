@@ -79,6 +79,14 @@ npm run dev
 ### 多代理设置
 本节展示如何设置多代理系统，实现A2A代理之间的协作。
 
+## 单Agent的调用流程
+```mermaid
+graph TD
+    A[前端] --> B[Agent1]
+    B --> E[MCP Tool1]
+    C --> F[MCP Tool2]
+```
+
 #### 1. 启动1个Agent
 - **Agent RAG**：
 ```bash
@@ -108,23 +116,6 @@ npm run dev
 ```
 - 在浏览器中打开前端，添加代理，并通过问答界面开始交互。
 
-### 单代理设置
-本节展示如何运行单个A2A代理及其专用前端。
-
-#### 1. 启动A2A代理
-- **Agent RAG**：
-```bash
-cd backend/AgentRAG
-python main.py --port 10005
-```
-
-#### 2. 启动前端
-```bash
-cd single_agent
-npm install
-npm run dev
-```
-- 在浏览器中访问前端以与单个代理交互。
 
 ## 多Agent的调用流程
 ```mermaid

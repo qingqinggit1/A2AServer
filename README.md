@@ -69,6 +69,14 @@ npm run dev
 ```
 Open the frontend in your browser, add the agent, and start interacting through the Q&A interface.
 
+## Single Agent Call Flow
+```mermaid
+graph TD
+    A[Frontend] --> B[Agent1]
+    B --> E[MCP Tool1]
+    C --> F[MCP Tool2]
+```
+
 ### Multi-Agent Setup
 This section demonstrates how to set up a multi-agent system with collaboration between A2A agents.
 
@@ -101,23 +109,6 @@ npm run dev
 ```
 - Open the frontend in your browser, add agents, and start interacting via the Q&A interface.
 
-### Single-Agent Setup
-This section shows how to run a single A2A agent with a dedicated frontend.
-
-#### 1. Start A2A Agent
-- **Agent RAG**:
-```bash
-cd backend/AgentRAG
-python main.py --port 10005
-```
-
-#### 2. Start Frontend
-```bash
-cd single_agent
-npm install
-npm run dev
-```
-- Access the frontend in your browser to interact with the single agent.
 
 ## Multi-Agent Call Flow
 ```mermaid
