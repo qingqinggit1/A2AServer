@@ -1,6 +1,24 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
+const navItems = [
+  { to: "/agents", label: "Agent", hoverColor: "blue-600" },
+  { to: "/start_conversations", label: "开始会话", hoverColor: "green-600" },
+  { to: "/conversations", label: "会话记录", hoverColor: "green-600" },
+  { to: "/events", label: "事件", hoverColor: "purple-600" },
+  { to: "/settings", label: "设置", hoverColor: "yellow-500" },
+  { to: "/tasks", label: "任务", hoverColor: "red-500" },
+];
+
+const NavLink = ({ to, children, hoverColor }) => (
+  <Link
+    to={to}
+    className={`text-gray-600 hover:text-${hoverColor} font-medium`}
+  >
+    {children}
+  </Link>
+);
+
 export const Header = () => {
   return (
     <header className="bg-white shadow-md p-4 flex items-center justify-between">
@@ -8,24 +26,15 @@ export const Header = () => {
         <Link to="/">A2A</Link>
       </div>
       <nav className="flex space-x-4">
-        <Link to="/agents" className="text-gray-600 hover:text-blue-600 font-medium">
-          Agent
-        </Link>
-        <Link to="/start_conversations" className="text-gray-600 hover:text-green-600 font-medium">
-          开始会话
-        </Link>
-        <Link to="/conversations" className="text-gray-600 hover:text-green-600 font-medium">
-          会话记录
-        </Link>
-        <Link to="/events" className="text-gray-600 hover:text-purple-600 font-medium">
-          事件
-        </Link>
-        <Link to="/settings" className="text-gray-600 hover:text-yellow-500 font-medium">
-          设置
-        </Link>
-        <Link to="/tasks" className="text-gray-600 hover:text-red-500 font-medium">
-          任务
-        </Link>
+        {navItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            hoverColor={item.hoverColor}
+          >
+            {item.label}
+          </NavLink>
+        ))}
       </nav>
     </header>
   );

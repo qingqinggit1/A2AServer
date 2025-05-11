@@ -3,7 +3,7 @@ import { useRecoilValue, useRecoilState } from 'recoil';
 import { currentConversationIdState, messagesState } from '../store/recoilState';
 import ChatBubble from './ChatBubble';
 import FormRenderer from './FormRenderer';
-import * as api from '../api/api'; 
+import * as api from '../api/api';
 import { v4 as uuidv4 } from 'uuid';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
@@ -18,6 +18,9 @@ const Conversation = () => {
     const [isSending, setIsSending] = useState(false);
     const [pollingIntervalId, setPollingIntervalId] = useState(null);
     const processedEventIds = useRef(new Set());
+    const maxPollingTime = 10000; // 30秒最大轮询时间
+    const pollingStartTime = useRef(null);
+
     console.log("当前会话 ID:", conversationId);
     // 组件卸载或conversationId变化时清理轮询
     useEffect(() => {
@@ -58,11 +61,10 @@ const Conversation = () => {
             clearInterval(pollingIntervalId);
         }
 
-        const startTime = Date.now();
-        const maxPollingTime = 60000; // 60秒最大轮询时间
+        pollingStartTime.current = Date.now();
 
         const intervalId = setInterval(async () => {
-            const elapsedTime = Date.now() - startTime;
+            const elapsedTime = Date.now() - pollingStartTime.current;
             if (elapsedTime > maxPollingTime) {
                 console.log(`[${(elapsedTime / 1000).toFixed(1)}s] 轮询超时（超过 ${maxPollingTime / 1000} 秒），停止轮询`);
                 clearInterval(intervalId);
@@ -100,8 +102,8 @@ const Conversation = () => {
                             processedEventIds.current.add(event.id);
                             const formattedMessage = formatEventToMessage(event, conversationId);
 
-                            const hasContent = formattedMessage.content.some(part => 
-                                (typeof part[0] === 'string' && part[0].trim() !== "") || 
+                            const hasContent = formattedMessage.content.some(part =>
+                                (typeof part[0] === 'string' && part[0].trim() !== "") ||
                                 (typeof part[0] === 'object' && part[0] !== null)
                             );
                             if (hasContent) {
@@ -116,15 +118,15 @@ const Conversation = () => {
                         setMessages(prevMessages => {
                             const currentMessageIds = new Set(prevMessages.map(m => m.message_id));
                             let newMessages = [...prevMessages]; // 创建数组的浅拷贝
-                        
+
                             for (const nm of newMessagesFromEvents) {
                                 if (currentMessageIds.has(nm.message_id)) continue;
-                        
+
                                 const lastMsg = newMessages[newMessages.length - 1];
-                        
+
                                 const nmText = nm.content?.map(p => p[0]).join('\n').trim();
                                 const lastText = lastMsg?.content?.map(p => p[0]).join('\n').trim();
-                        
+
                                 if (lastMsg && nm.role === lastMsg.role && nmText === lastText) {
                                     // 创建 lastMsg 的副本并更新 dupCount
                                     const updatedLastMsg = { ...lastMsg, dupCount: (lastMsg.dupCount || 1) + 1 };
@@ -138,10 +140,11 @@ const Conversation = () => {
                                     newMessages = [...newMessages, { ...nm, dupCount: 1 }];
                                 }
                             }
-                        
+
+                            // 收到新消息时，重置轮询开始时间，延长最大轮询时间
+                            pollingStartTime.current = Date.now();
                             return newMessages;
                         });
-                        
                     }
                 }
 

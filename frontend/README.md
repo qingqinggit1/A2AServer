@@ -17,14 +17,19 @@ python main.py --port 10004
 ```
 
 ### 2. 启动host Agent， 用于协调多个Agent，决定使用哪个Agent和查看Agent的状态等
+```
 cd hostAgentAPI
 pip install -r requirements.txt
 python api.py
+```
 
 ### 3. 启动前端
+```
 cd multiagent_front
 npm install
 npm run dev
+```
+然后添加Agent，进行问答
 
 
 ## 单个A2A的Agent的界面
@@ -37,6 +42,8 @@ cd backend/AgentRAG
 python main.py --port 10005
 ```
 ### 2. 启动前端
+```
 cd single_agent
 npm install
 npm run dev
+```
