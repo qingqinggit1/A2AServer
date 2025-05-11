@@ -18,7 +18,7 @@ const Conversation = () => {
     const [isSending, setIsSending] = useState(false);
     const [pollingIntervalId, setPollingIntervalId] = useState(null);
     const processedEventIds = useRef(new Set());
-    const maxPollingTime = 10000; // 30秒最大轮询时间
+    const maxPollingTime = 30000; // 30秒最大轮询时间
     const pollingStartTime = useRef(null);
 
     console.log("当前会话 ID:", conversationId);
