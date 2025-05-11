@@ -72,14 +72,14 @@ Open the frontend in your browser, add the agent, and start interacting through 
 ### Multi-Agent Setup
 This section demonstrates how to set up a multi-agent system with collaboration between A2A agents.
 
-#### 1. Start A2A Agents
+#### 1. Start Agent 1
 - **Agent RAG**:
 ```bash
 cd backend/AgentRAG
 python main.py --port 10005
 ```
 
-- **Agent DeepSearch**:
+#### 2. Start Agent 2
 ```bash
 cd backend/DeepSearch
 python main.py --port 10004
@@ -88,14 +88,14 @@ python main.py --port 10004
 #### 2. Start Host Agent
 The host agent coordinates multiple A2A agents, manages their states, and decides which agent to use.
 ```bash
-cd hostAgentAPI
+cd frontend/hostAgentAPI
 pip install -r requirements.txt
 python api.py
 ```
 
 #### 3. Start Frontend
 ```bash
-cd multiagent_front
+cd frontend/multiagent_front
 npm install
 npm run dev
 ```
@@ -118,6 +118,18 @@ npm install
 npm run dev
 ```
 - Access the frontend in your browser to interact with the single agent.
+
+## Multi-Agent Call Flow
+```mermaid
+graph TD
+    A[Frontend] --> B[HostAgent]
+    B --> C[Agent1]
+    B --> D[Agent2]
+    D --> E[MCP Tool1]
+    D --> F[MCP Tool2]
+    C --> M[MCP Tool3]
+```
+
 
 ## 📂 Project Structure
 ```
