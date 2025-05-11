@@ -133,7 +133,7 @@ graph TD
     B --> C[Agent1]
     B --> D[Agent2]
     D --> E[MCP Tool1]
-    D --> E[MCP Tool2]
+    D --> F[MCP Tool2]
     C --> M[MCP Tool3]
 ```
 
