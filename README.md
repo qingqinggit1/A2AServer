@@ -74,7 +74,7 @@ Open the frontend in your browser, add the agent, and start interacting through 
 graph TD
     A[Frontend] --> B[Agent1]
     B --> E[MCP Tool1]
-    C --> F[MCP Tool2]
+    B --> F[MCP Tool2]
 ```
 
 ### Multi-Agent Setup

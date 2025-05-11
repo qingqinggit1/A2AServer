@@ -84,7 +84,7 @@ npm run dev
 graph TD
     A[前端] --> B[Agent1]
     B --> E[MCP Tool1]
-    C --> F[MCP Tool2]
+    B --> F[MCP Tool2]
 ```
 
 #### 1. 启动1个Agent
