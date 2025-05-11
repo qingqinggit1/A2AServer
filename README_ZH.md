@@ -129,10 +129,12 @@ npm run dev
 ## 多Agent的调用流程
 ```mermaid
 graph TD
-    A[客户端] --> B[API网关]
-    B --> C[认证服务]
-    B --> D[业务服务]
-    D --> E[数据库]
+    A[前端] --> B[HostAgent]
+    B --> C[Agent1]
+    B --> D[Agent2]
+    D --> E[MCP Tool1]
+    D --> E[MCP Tool2]
+    C --> M[MCP Tool3]
 ```
 
 ## 📂 项目结构
