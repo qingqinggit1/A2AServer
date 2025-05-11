@@ -1,101 +1,116 @@
-A2A-MCP Server Framework
+# A2A-MCP Server Framework
 
-A Fully Compatible Implementation of Google's Agent-to-Agent (A2A) Protocol with Model Context Protocol (MCP) Integration
+<div align="center">
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 
-🌟 Overview
-A2A-MCP Server Framework is a robust, production-ready solution that leverages Google's Agent-to-Agent (A2A) protocol and integrates seamlessly with the Model Context Protocol (MCP). This project is designed for building interoperable single and multi-agent systems with full compatibility with Google's official A2A code. It offers a clear structure, rich examples, and a full-stack, ready-to-use implementation for developers.
+**A Fully Compatible Implementation of Google's Agent-to-Agent (A2A) Protocol with Model Context Protocol (MCP) Integration**
+
+</div>
+
+## 🌟 Overview
+
+A2A-MCP Serer Framework is a robust, production-ready solution that leverages Google's [Agent-to-Agent (A2A) protocol](https://google.github.io/A2A/) and integrates seamlessly with the [Model Context Protocol (MCP)](https://contextual.ai/introducing-mcp/). This project is designed for building interoperable single and multi-agent systems with full compatibility with Google's official A2A code. It offers a clear structure, rich examples, and a full-stack, ready-to-use implementation for developers.
+
 Key highlights:
+- **100% A2A Compatibility**: Built using Google's official A2A code for maximum interoperability.
+- **MCP Integration**: First-class support for MCP, enabling agents to access external tools and data sources.
+- **Clear Structure**: Well-organized project with comprehensive examples for single and multi-agent setups.
+- **Full-Stack Solution**: Includes both backend (Python) and frontend (Node.js) components for immediate deployment.
+- **Rich Examples**: Demonstrates practical use cases for both single-agent and multi-agent collaboration.
 
-100% A2A Compatibility: Built using Google's official A2A code for maximum interoperability.
-MCP Integration: First-class support for MCP, enabling agents to access external tools and data sources.
-Clear Structure: Well-organized project with comprehensive examples for single and multi-agent setups.
-Full-Stack Solution: Includes both backend (Python) and frontend (Node.js) components for immediate deployment.
-Rich Examples: Demonstrates practical use cases for both single-agent and multi-agent collaboration.
+## ✨ Why Choose A2A-MCP Server Framework?
 
-✨ Why Choose A2A-MCP Framework?
+- **Complete A2A Implementation**: Adheres strictly to the official A2A specification.
+- **Flexible Agent Systems**: Supports both single-agent and multi-agent workflows.
+- **MCP Tooling**: Easily integrate external tools via MCP for enhanced agent capabilities.
+- **Production-Ready**: Robust error handling and clear documentation for enterprise use.
+- **Developer-Friendly**: Rich examples, intuitive setup, and minimal dependencies.
 
-Complete A2A Implementation: Adheres strictly to the official A2A specification.
-Flexible Agent Systems: Supports both single-agent and multi-agent workflows.
-MCP Tooling: Easily integrate external tools via MCP for enhanced agent capabilities.
-Production-Ready: Robust error handling and clear documentation for enterprise use.
-Developer-Friendly: Rich examples, intuitive setup, and minimal dependencies.
+## 📦 Installation
 
-📦 Installation
-Prerequisites
+### Prerequisites
+- Python 3.10+
+- Node.js 16+
+- pip for Python dependencies
+- npm for frontend dependencies
 
-Python 3.10+
-Node.js 16+
-pip for Python dependencies
-npm for frontend dependencies
-
-Backend Setup
-
-Clone the repository:
-
-git clone https://github.com/johnson7788/A2AServer.git
-cd A2AServer
-
-Install backend dependencies:
-
+### Backend Setup
+1. Clone the repository:
+```bash
+git clone https://github.com/johnson7788/A2AServer
 cd backend/A2AServer
-pip install -e .
+```
 
-Frontend Setup
+2. Install backend dependencies:
+```bash
+cd backend
+pip install .
+```
 
-Install frontend dependencies for multi-agent or single-agent frontend:
-
+### Frontend Setup
+1. Install frontend dependencies for multi-agent or single-agent frontend:
+```bash
 cd multiagent_front  # or cd single_agent
 npm install
+```
 
-🚀 Quick Start
-Multi-Agent Setup
+## 🚀 Quick Start
+
+### Multi-Agent Setup
 This section demonstrates how to set up a multi-agent system with collaboration between A2A agents.
-1. Start A2A Agents
 
-Agent RAG:
-
+#### 1. Start A2A Agents
+- **Agent RAG**:
+```bash
 cd backend/AgentRAG
 python main.py --port 10005
+```
 
-
-Agent DeepSearch:
-
+- **Agent DeepSearch**:
+```bash
 cd backend/DeepSearch
 python main.py --port 10004
+```
 
-2. Start Host Agent
+#### 2. Start Host Agent
 The host agent coordinates multiple A2A agents, manages their states, and decides which agent to use.
+```bash
 cd hostAgentAPI
 pip install -r requirements.txt
 python api.py
+```
 
-3. Start Frontend
+#### 3. Start Frontend
+```bash
 cd multiagent_front
 npm install
 npm run dev
+```
+- Open the frontend in your browser, add agents, and start interacting via the Q&A interface.
 
-
-Open the frontend in your browser, add agents, and start interacting via the Q&A interface.
-
-Single-Agent Setup
+### Single-Agent Setup
 This section shows how to run a single A2A agent with a dedicated frontend.
-1. Start A2A Agent
 
-Agent RAG:
-
+#### 1. Start A2A Agent
+- **Agent RAG**:
+```bash
 cd backend/AgentRAG
 python main.py --port 10005
+```
 
-2. Start Frontend
+#### 2. Start Frontend
+```bash
 cd single_agent
 npm install
 npm run dev
+```
+- Access the frontend in your browser to interact with the single agent.
 
-
-Access the frontend in your browser to interact with the single agent.
-
-📂 Project Structure
+## 📂 Project Structure
+```
 A2AServer
 ├── backend
 │   ├── A2AServer           # A2A server dependencies
@@ -106,17 +121,18 @@ A2AServer
 ├── multiagent_front        # Frontend for multi-agent collaboration
 ├── single_agent            # Frontend for single-agent interaction
 └── README.md               # Project documentation
+```
 
-🛠️ Developing Your Own A2A Server
+## 🛠️ Developing Your Own A2A Server
 To create a custom A2A server, follow these steps:
 
-Copy the DeepSearch Example:
-
+1. **Copy the DeepSearch Example**:
+```bash
 cp -r backend/DeepSearch backend/MyCustomAgent
+```
 
-
-Directory Structure:
-
+2. **Directory Structure**:
+```angular2html
 MyCustomAgent
 ├── .env                # Environment file for model keys
 ├── main.py             # A2A server startup script
@@ -124,14 +140,12 @@ MyCustomAgent
 ├── mcpserver           # MCP server code (optional)
 │   └── my_tool.py      # Custom MCP tool
 └── prompt.txt          # Agent prompt file
+```
 
-
-Configure MCP Tools:
-
-
-Ensure tool names in mcp_config.json use camelCase (e.g., MyCustomTool) instead of underscores (e.g., My_Custom_Tool) to avoid lookup issues.
-Example mcp_config.json:
-
+3. **Configure MCP Tools**:
+- Ensure tool names in `mcp_config.json` use camelCase (e.g., `MyCustomTool`) instead of underscores (e.g., `My_Custom_Tool`) to avoid lookup issues.
+- Example `mcp_config.json`:
+```json
 {
   "tools": [
     {
@@ -141,51 +155,49 @@ Example mcp_config.json:
     }
   ]
 }
+```
 
-
-Run Your Server:
-
+4. **Run Your Server**:
+```bash
 cd backend/MyCustomAgent
 python main.py --port 10006
+```
 
-⚠️ Notes
+## ⚠️ Notes
+- **Tool Naming**: Use camelCase for tool names in `mcp_config.json` (e.g., `SearchTool`, `RAGTool`) to ensure compatibility.
+- **Environment Variables**: Store API keys and sensitive data in the `.env` file.
+- **Port Conflicts**: Ensure unique ports for each agent to avoid conflicts.
 
-Tool Naming: Use camelCase for tool names in mcp_config.json (e.g., SearchTool, RAGTool) to ensure compatibility.
-Environment Variables: Store API keys and sensitive data in the .env file.
-Port Conflicts: Ensure unique ports for each agent to avoid conflicts.
+## 🧩 Core Features
+- **Single-Agent Interface**: Simple, intuitive UI for interacting with a single A2A agent.
+- **Multi-Agent Collaboration**: Host agent coordinates multiple A2A agents for complex tasks.
+- **MCP Integration**: Seamless access to external tools and data via MCP.
+- **Rich Examples**: Comprehensive examples for both single and multi-agent setups.
+- **Full-Stack**: Backend and frontend components for immediate deployment.
 
-🧩 Core Features
+## 🗺️ Use Cases
+- **AI-Powered Assistants**: Build intelligent assistants with single or multi-agent setups.
+- **Research Tools**: Create collaborative agent systems for data analysis or search.
+- **Enterprise Workflows**: Coordinate multiple agents for complex business processes.
+- **Educational Platforms**: Demonstrate agent collaboration for learning purposes.
 
-Single-Agent Interface: Simple, intuitive UI for interacting with a single A2A agent.
-Multi-Agent Collaboration: Host agent coordinates multiple A2A agents for complex tasks.
-MCP Integration: Seamless access to external tools and data via MCP.
-Rich Examples: Comprehensive examples for both single and multi-agent setups.
-Full-Stack: Backend and frontend components for immediate deployment.
-
-🗺️ Use Cases
-
-AI-Powered Assistants: Build intelligent assistants with single or multi-agent setups.
-Research Tools: Create collaborative agent systems for data analysis or search.
-Enterprise Workflows: Coordinate multiple agents for complex business processes.
-Educational Platforms: Demonstrate agent collaboration for learning purposes.
-
-📖 Contributing
+## 📖 Contributing
 We welcome contributions! To get started:
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/my-feature`).
+3. Commit your changes (`git commit -m 'Add my feature'`).
+4. Push to the branch (`git push origin feature/my-feature`).
+5. Open a pull request.
 
-Fork the repository.
-Create a feature branch (git checkout -b feature/my-feature).
-Commit your changes (git commit -m 'Add my feature').
-Push to the branch (git push origin feature/my-feature).
-Open a pull request.
+See our [contributing guide](CONTRIBUTING.md) for more details.
 
-See our contributing guide for more details.
-🤝 Community & Support
+## 🤝 Community & Support
+- **[GitHub Issues](https://github.com/johnson7788/A2AServer/issues)**: Report bugs or request features.
+- **[GitHub Discussions](https://github.com/johnson7788/A2AServer/discussions)**: Ask questions and share ideas.
 
-GitHub Issues: Report bugs or request features.
-GitHub Discussions: Ask questions and share ideas.
+## 📄 License
+This project is licensed under the MIT License - Free for all.
 
-📄 License
-This project is licensed under the MIT License - see the LICENSE file for details.
+---
 
-Made with ❤️ by Johnson Guo
-
+Made with ❤️ by [Johnson GUO](https://github.com/johnson7788)
