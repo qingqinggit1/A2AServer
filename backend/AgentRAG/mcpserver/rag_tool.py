@@ -18,7 +18,7 @@ def RAGsearch(query: str) -> str:
     :param query: 搜索的词语和句子
     :return:
     """
-    # 模拟搜索结果
+    # 模拟搜索结果, 真实开发，需要替换成自己的向量检索结果
     rag_result = """LNG 是 液化天然气 (Liquefied Natural Gas) 的英文缩写。简单来说，它就是经过冷却至零下约 162 摄氏度 (-260 华氏度) 的液态天然气。
 
 你可以把它想象成把气体“浓缩”成液体，这样做有几个重要的好处：
