@@ -1,49 +1,71 @@
-# 目录
-## 多Agent示例
-hostAgentAPI： 多Agent示例，调用多个A2A的Agent一起协作
-multiagent_front: 多Agent示例前端, 多个Agent的协作
+# Single Agent and Multi-Agent Frontend
 
-### 1. 启动1个A2A的Agent
-启动Agent RAG
+📘 [中文Readme](./README_ZH.md)
+
+This project demonstrates how multiple A2A Agents collaborate to complete tasks, including multiple Agent backend services, a unified orchestration interface, and a frontend interface. It supports both single and multi-Agent modes.
+
+## 📁 Project Structure
+* **hostAgentAPI**: Central API for coordinating multiple Agents, determining which Agent to call, checking status, etc.
+* **multiagent_front**: Frontend interface for multi-Agent collaboration mode
+* **single_agent**: Frontend interface for single-Agent mode
+
+## 🚀 Quick Start
+### 1. Multi-Agent Mode
+
+#### 1. Start an A2A Agent
+Start Agent RAG:
 ```
 cd backend/AgentRAG
 python main.py --port 10005
 ```
 
-启动第二个Agent， DeepSearch
+#### 2. Start a Second Agent, DeepSearch
 ```
 cd backend/DeepSearch
 python main.py --port 10004
 ```
 
-### 2. 启动host Agent， 用于协调多个Agent，决定使用哪个Agent和查看Agent的状态等
+#### 3. Start the Host Agent for Coordinating Multiple Agents
+The host Agent decides which Agent to use and monitors their status:
 ```
 cd hostAgentAPI
 pip install -r requirements.txt
 python api.py
 ```
 
-### 3. 启动前端
+#### 4. Start the Frontend
 ```
 cd multiagent_front
 npm install
 npm run dev
 ```
-然后添加Agent，进行问答
 
+#### 5. Add Agent Configurations and Start Q&A in the Web Interface
+After opening the frontend page, add the addresses and information for each Agent.  
+Input a question and observe the collaborative response process of multiple Agents.
 
-## 单个A2A的Agent的界面
-single_agent: 单个Agent使用界面
+### 2. Single A2A Mode
 
-### 1. 启动1个A2A的Agent
-启动Agent RAG
+#### 1. Start an A2A Agent, e.g., Agent RAG
 ```
 cd backend/AgentRAG
 python main.py --port 10005
 ```
-### 2. 启动前端
+
+#### 2. Start the Frontend
 ```
 cd single_agent
 npm install
 npm run dev
 ```
+
+#### 3. Open the Frontend Page and Start Q&A
+Open the frontend page, input the URL address of the Agent to use, and begin the Q&A session.
+
+## 💡 Project Highlights
+- Multi-Agent orchestration and collaboration framework, easily extensible for integrating additional intelligent Agents
+- Separated frontend and backend with a clear interface, supporting dynamic Agent addition
+- Supports isolated testing of individual Agent capabilities and performance
+
+## 📌 Notes
+- All services run locally by default; ensure the ports are not occupied.

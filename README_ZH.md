@@ -1,6 +1,6 @@
 # A2A-MCP 服务器框架
 
-📘 [中文文档 README_ZH.md](./README_ZH.md)
+📘 [中文Readme](./README_ZH.md)
 
 <div align="center">
 
