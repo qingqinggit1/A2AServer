@@ -15,7 +15,7 @@ const ChatBubble = ({ message }) => {
     return null; // 不渲染空消息
   }
 
-  const isAgent = message.role === 'agent';
+  const isAgent = message.actor !== 'user';
   // 根据角色调整对齐方式
   const alignment = isAgent ? 'justify-start' : 'justify-end';
   // 根据角色设置气泡颜色 (Tailwind 颜色类)
@@ -35,8 +35,8 @@ const ChatBubble = ({ message }) => {
     <div className={`flex ${alignment} w-full my-1`} > {/* 增加垂直间距 */}
       <div className="flex flex-col gap-1 items-end"> {/* 内部元素间距，如果是用户消息则靠右 */}
         {/* 显示角色标识 */}
-        <div className={`text-xs text-gray-500 mb-1 ${message.role === 'user' ? 'self-end' : 'self-start'}`}>
-          {message.role === 'user' ? '👤 user' : `🤖 ${message.role}`}
+        <div className={`text-xs text-gray-500 mb-1 ${message.actor === 'user' ? 'self-end' : 'self-start'}`}>
+          {message.actor === 'user' ? '👤 user' : `🤖 ${message.actor}`}
         </div>
         {message.content.map(([content, mediaType], index) => {
           const partKey = `${message.message_id}-part-${index}`; // 为每个部分生成唯一 key
