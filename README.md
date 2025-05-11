@@ -43,23 +43,31 @@ Key highlights:
 1. Clone the repository:
 ```bash
 git clone https://github.com/johnson7788/A2AServer.git
-cd backend/A2AServer
 ```
 
 2. Install backend dependencies:
 ```bash
-cd backend
+cd backend/A2AServer
 pip install .
 ```
 
-### Frontend Setup
-1. Install frontend dependencies for multi-agent or single-agent frontend:
-```bash
-cd multiagent_front  # or cd single_agent
-npm install
-```
-
 ## 🚀 Quick Start
+
+### Single-Agent Example
+
+#### 1. Start the A2A Agent
+- **Agent RAG**:
+```bash
+cd backend/AgentRAG
+python main.py --port 10005
+```
+#### 2. Start the Frontend
+```
+cd frontend/single_agent
+npm install
+npm run dev
+```
+Open the frontend in your browser, add the agent, and start interacting through the Q&A interface.
 
 ### Multi-Agent Setup
 This section demonstrates how to set up a multi-agent system with collaboration between A2A agents.

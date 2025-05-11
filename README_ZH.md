@@ -43,12 +43,11 @@ A2A-MCP 服务器框架是一个健壮的、生产就绪的解决方案，利用
 1. 克隆仓库：
 ```bash
 git clone https://github.com/johnson7788/A2AServer.git
-cd backend/A2AServer
 ```
 
 2. 安装后端依赖：
 ```bash
-cd backend
+cd backend/A2AServer
 pip install .
 ```
 
@@ -61,15 +60,25 @@ npm install
 
 ## 🚀 快速开始
 
-### 多代理设置
-本节展示如何设置多代理系统，实现A2A代理之间的协作。
-
+### 单Agent示例
 #### 1. 启动A2A代理
 - **Agent RAG**：
 ```bash
 cd backend/AgentRAG
 python main.py --port 10005
 ```
+
+#### 2. 启动前端
+```bash
+cd frontend/single_agent
+npm install
+npm run dev
+```
+- 在浏览器中打开前端，添加代理，并通过问答界面开始交互。
+
+### 多代理设置
+本节展示如何设置多代理系统，实现A2A代理之间的协作。
+
 
 - **Agent DeepSearch**：
 ```bash
