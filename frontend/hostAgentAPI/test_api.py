@@ -34,6 +34,23 @@ class ConversationServerTestCase(unittest.TestCase):
         assert r.json() == "Pong", f"接口是否未启动"
         print(f"花费时间: {time.time() - start_time}秒")
 
+    def test_register_agent(self):
+        """
+        测试 /agent/register 接口
+        """
+        url = f"{self.base_url}/agent/register"
+        headers = {'Content-Type': 'application/json'}
+        agent_url = "127.0.0.1:10003"
+        payload = {"params": agent_url}
+        start_time = time.time()
+        response = requests.post(url, headers=headers, json=payload)
+        self.assertEqual(response.status_code, 200, f"/agent/register 接口状态码应为 200，但实际为 {response.status_code}")
+        self.assertEqual(response.headers.get('Content-Type'), 'application/json', f"/agent/register 接口 Content-Type 应为 application/json，但实际为 {response.headers.get('Content-Type')}")
+        res = response.json()
+        print(f"注册Agent的结果: ")
+        print(json.dumps(res, indent=2, ensure_ascii=False))
+        self.assertIn("result", res, "/agent/register 接口返回值应包含 'result' 字段")
+        print(f"/agent/register 测试花费时间: {time.time() - start_time}秒")
     def test_create_conversation(self):
         """
         测试 /conversation/create 接口
@@ -192,24 +209,6 @@ class ConversationServerTestCase(unittest.TestCase):
         self.assertIsInstance(res["result"], list, "/task/list 接口返回值 'result' 应为列表")
         print(f"/task/list 测试花费时间: {time.time() - start_time}秒")
 
-    def test_register_agent(self):
-        """
-        测试 /agent/register 接口
-        """
-        url = f"{self.base_url}/agent/register"
-        headers = {'Content-Type': 'application/json'}
-        agent_url = "127.0.0.1:10003"
-        payload = {"params": agent_url}
-        start_time = time.time()
-        response = requests.post(url, headers=headers, json=payload)
-        self.assertEqual(response.status_code, 200, f"/agent/register 接口状态码应为 200，但实际为 {response.status_code}")
-        self.assertEqual(response.headers.get('Content-Type'), 'application/json', f"/agent/register 接口 Content-Type 应为 application/json，但实际为 {response.headers.get('Content-Type')}")
-        res = response.json()
-        print(f"注册Agent的结果: ")
-        print(json.dumps(res, indent=2, ensure_ascii=False))
-        self.assertIn("result", res, "/agent/register 接口返回值应包含 'result' 字段")
-        print(f"/agent/register 测试花费时间: {time.time() - start_time}秒")
-
     def test_list_agents(self):
         """
         测试 /agent/list 接口
@@ -246,6 +245,7 @@ class ConversationServerTestCase(unittest.TestCase):
     def test_send_and_poll_pending(self):
         """
         测试发送消息后，轮询 /message/pending 获取正在处理的消息
+        想要使用某个Agent回答，务必要注册这个Agent
         """
         # 首先发送一条消息
         if not hasattr(self, 'created_conversation_id'):
@@ -256,7 +256,7 @@ class ConversationServerTestCase(unittest.TestCase):
         message_payload = {
             "params": {
                 "role": "user",
-                "parts": [{"type": "text", "text": "你好"}],
+                "parts": [{"type": "text", "text": "解释下什么是LNG"}],
                 "metadata": {"conversation_id": self.created_conversation_id}
             }
         }
@@ -268,7 +268,7 @@ class ConversationServerTestCase(unittest.TestCase):
 
         # 然后轮询 pending 接口
         url_pending = f"{self.base_url}/message/pending"
-        timeout = 20  # 最多等待 20 秒
+        timeout = 120  # 最多等待 120 秒
         interval = 0.5
         elapsed = 0
 

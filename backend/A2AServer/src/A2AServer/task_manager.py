@@ -47,28 +47,6 @@ def decode_tool_calls_to_string(raw_str: str) -> str:
 
     # 返回格式化的 JSON 字符串（ensure_ascii=False 让中文显示正常）
     return json.dumps(tool_calls, ensure_ascii=False, indent=2)
-def decode_sequential_tool_calls_to_string(raw_str: str) -> str:
-    # 去掉前缀
-    if raw_str.startswith("Tool:CALL:"):
-        raw_str = raw_str[len("Tool:CALL:"):]
-
-    # 解析 JSON
-    tool_calls = json.loads(raw_str)
-    thought = ""
-    # 解码每个 tool_call 的 arguments
-    for call in tool_calls:
-        args_str = call.get("function", {}).get("arguments", "")
-        try:
-            tool_name = call["function"]["name"]
-            if tool_name == os.environ.get("SEQUETINAL_TOOL_NAME"):
-                arguments = json.loads(args_str)
-                thought = arguments.get("thought", "")
-        except json.JSONDecodeError:
-            pass  # 如果解析失败就跳过
-
-    # 返回格式化的 JSON 字符串（ensure_ascii=False 让中文显示正常）
-    return thought
-
 def decode_tool_call_result_to_string(raw_str: str) -> str:
     # 去掉前缀
     if raw_str.startswith("Tool:RESULT:"):
@@ -78,9 +56,9 @@ def decode_tool_call_result_to_string(raw_str: str) -> str:
     content = load_json.get("content", "")
     if content:
         content_data = json.loads(content)
-        print("content_data:", content_data)
+        logger.info(f"decode_tool_call_result_to_string: content_data: {content_data}")
         if "error" in content_data:
-            logging.warning("Tool call error: %s", content_data["error"])
+            logger.warning("Tool call error: %s", content_data["error"])
         else:
             nest_contents = content_data["content"]
             for content_item in nest_contents:
@@ -189,107 +167,105 @@ class AgentTaskManager(InMemoryTaskManager):
         return SendTaskResponse(id=request.id, result=task_result)
 
     async def _stream_generator(
-        self, request: SendTaskStreamingRequest
+            self, request: SendTaskStreamingRequest
     ) -> AsyncIterable[SendTaskStreamingResponse] | JSONRPCResponse:
         """
         Handle the 'tasks/sendSubscribe' JSON-RPC method for streaming responses.
         """
         task_send_params: TaskSendParams = request.params
         query = self._get_user_query(task_send_params)
-        print(f"发送过来的请求是 {query}, 参数是 {task_send_params}")
+        logger.info(f"发送过来的请求是 {query}, 参数是 {task_send_params}")
         try:
-          async for item in self.agent.stream(query, task_send_params.sessionId):
-            print("返回的item: ", item)
-            if item.get("is_tool"):
-                # 带工具返回
-                if os.environ.get("ONLY_SEQUENTIAL_THINKING") == "true":
-                    if ':CALL:' in item["content"]:
-                        content = decode_sequential_tool_calls_to_string(item["content"])
-                        print(f"Sequential thinking CALL的执行参数: {content}")
-                        parts = [{"type": "text", "text": content}]
-                        message = Message(role="agent", parts=parts)
-                        task_status = TaskStatus(state=task_state, message=message)
-                    else:
-                        # 其它的情况，返回空的即可
-                        task_status = TaskStatus(
-                            state=TaskState.WORKING,
-                        )
-                else:
+            # 跟踪是否是第一个非工具 token
+            is_first_token = True
+            async for item in self.agent.stream(query, task_send_params.sessionId):
+                print("返回的item: ", item)
+                if item.get("is_tool"):
+                    # 带工具返回
                     if ':CALL:' in item["content"]:
                         content = decode_tool_calls_to_string(item["content"])
-                        print(f"CALL的工具的解析结果: {content}")
+                        logger.info(f"CALL的工具的解析结果: {content}")
                     elif ':RESULT:' in item["content"]:
                         content = decode_tool_call_result_to_string(item["content"])
-                        print(f"RESULT的工具的解析结果: {content}")
+                        logger.info(f"RESULT的工具的解析结果: {content}")
                     else:
                         content = item["content"]
-                        print(f"正常的回答的解析结果: {content}")
+                        logger.info(f"正常的回答的解析结果: {content}")
                     parts = [{"type": "text", "text": content}]
                     message = Message(role="agent", parts=parts)
-                    task_status = TaskStatus(state=task_state, message=message)
-            else:
-                # 不带工具返回
-                task_status = TaskStatus(
-                      state=TaskState.WORKING,
-                  )
-            task_update_event = TaskStatusUpdateEvent(
-                id=task_send_params.id,
-                status=task_status,
-                final=False,
-            )
-            print("发送的item的更新消息是: ", task_update_event)
-            yield SendTaskStreamingResponse(id=request.id, result=task_update_event)
-            is_task_complete = item["is_task_complete"]
-            artifacts = None
-            if not is_task_complete:
-              task_state = TaskState.WORKING
-              parts = [{"type": "text", "text": item.get("updates","Processing")}]
-            else:
-              if isinstance(item["content"], dict):
-                if ("response" in item["content"]
-                    and "result" in item["content"]["response"]):
-                  data = json.loads(item["content"]["response"]["result"])
-                  task_state = TaskState.INPUT_REQUIRED
+                    task_status = TaskStatus(state=TaskState.WORKING, message=message)
                 else:
-                  data = item["content"]
-                  task_state = TaskState.COMPLETED
-                parts = [{"type": "data", "data": data}]
-              else:
-                task_state = TaskState.COMPLETED
-                parts = [{"type": "text", "text": item["content"]}]
-              artifacts = [Artifact(parts=parts, index=0, append=False)]
-          message = Message(role="agent", parts=parts)
-          task_status = TaskStatus(state=task_state, message=message)
-          await self.update_store(task_send_params.id, task_status, artifacts)
-          task_update_event = TaskStatusUpdateEvent(
-                id=task_send_params.id,
-                status=task_status,
-                final=False,
-            )
-          yield SendTaskStreamingResponse(id=request.id, result=task_update_event)
-          # Now yield Artifacts too
-          if artifacts:
-            for artifact in artifacts:
-              print(f"发送的artifact是: ", artifact)
-              yield SendTaskStreamingResponse(
-                  id=request.id,
-                  result=TaskArtifactUpdateEvent(
-                      id=task_send_params.id,
-                      artifact=artifact,
-                  )
-              )
-          if is_task_complete:
-            print(f"发送的任务完成消息")
-            yield SendTaskStreamingResponse(
-              id=request.id,
-              result=TaskStatusUpdateEvent(
-                  id=task_send_params.id,
-                  status=TaskStatus(
-                      state=task_status.state,
-                  ),
-                  final=True
-              )
-            )
+                    # 不带工具返回
+                    task_status = TaskStatus(
+                        state=TaskState.WORKING,
+                    )
+                task_update_event = TaskStatusUpdateEvent(
+                    id=task_send_params.id,
+                    status=task_status,
+                    final=False,
+                )
+                logger.info(f"发送的item的更新消息是: {task_update_event}")
+                yield SendTaskStreamingResponse(id=request.id, result=task_update_event)
+                if item.get("is_tool"):
+                    # 如果是工具的结果，那么不在进行artifacts的返回了
+                    continue
+                is_task_complete = item["is_task_complete"]
+                artifacts = None
+                if not is_task_complete:
+                    task_state = TaskState.WORKING
+                    if item.get("content"):
+                        parts = [{"type": "text", "text": item["content"]}]
+                        # 根据是否是第一个 token 设置 append
+                        append_value = not is_first_token
+                        artifact = Artifact(parts=parts, index=0, append=append_value)
+                        # 逐条发送每个生成的内容
+                        logger.info(f"发送的artifact是: {artifact}")
+                        yield SendTaskStreamingResponse(
+                            id=request.id,
+                            result=TaskArtifactUpdateEvent(
+                                id=task_send_params.id,
+                                artifact=artifact,
+                            )
+                        )
+                        # 第一个 token 已发送，设置为 False
+                        is_first_token = False
+                else:
+                    task_state = TaskState.COMPLETED
+                    if isinstance(item["content"], dict):
+                        if ("response" in item["content"]
+                                and "result" in item["content"]["response"]):
+                            data = json.loads(item["content"]["response"]["result"])
+                            task_state = TaskState.INPUT_REQUIRED
+                        else:
+                            data = item["content"]
+                        parts = [{"type": "data", "data": data}]
+                    else:
+                        parts = [{"type": "text", "text": item["content"]}]
+                    # 最后一个 artifact，设置 lastChunk=True
+                    artifact = Artifact(parts=parts, index=0, append=True, lastChunk=True)
+                    logger.info(f"发送的artifact是: {artifact}")
+                    yield SendTaskStreamingResponse(
+                        id=request.id,
+                        result=TaskArtifactUpdateEvent(
+                            id=task_send_params.id,
+                            artifact=artifact,
+                        )
+                    )
+                message = Message(role="agent", parts=parts)
+                task_status = TaskStatus(state=task_state, message=message)
+                await self.update_store(task_send_params.id, task_status, artifacts)
+                if is_task_complete:
+                    logger.info(f"发送的任务完成消息")
+                    yield SendTaskStreamingResponse(
+                        id=request.id,
+                        result=TaskStatusUpdateEvent(
+                            id=task_send_params.id,
+                            status=TaskStatus(
+                                state=task_status.state,
+                            ),
+                            final=True
+                        )
+                    )
         except Exception as e:
             logger.error(f"An error occurred while streaming the response: {e}")
             traceback_str = traceback.format_exc()
