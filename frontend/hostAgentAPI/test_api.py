@@ -40,7 +40,7 @@ class ConversationServerTestCase(unittest.TestCase):
         """
         url = f"{self.base_url}/agent/register"
         headers = {'Content-Type': 'application/json'}
-        agent_url = "127.0.0.1:10003"
+        agent_url = "127.0.0.1:10005"
         payload = {"params": agent_url}
         start_time = time.time()
         response = requests.post(url, headers=headers, json=payload)

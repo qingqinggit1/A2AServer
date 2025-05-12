@@ -346,7 +346,7 @@ class BasicAgent:
                 yield {
                     "is_task_complete": True,  # Indicate it's an intermediate part
                     "require_user_input": False,
-                    "content": "".join(chunks)  # Yield the actual content chunk
+                    "content": " "
                 }
             except Exception as e:
                 logger.error(f"Error during processing: {traceback.format_exc()}")
