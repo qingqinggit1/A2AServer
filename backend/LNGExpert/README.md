@@ -1,4 +1,4 @@
-# Complex Question Answering Examples
+# Complex Question Answering Examples(flexible workflow)
 
 This repository provides examples of tools using the Model Context Protocol (MCP), enabling agents to complete tasks following specific workflows. Workflow examples are provided in the prompts; if not, agents will flexibly solve problems through reasoning.
 
