@@ -192,7 +192,7 @@ function ChatInterface({ agentCard }) {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-300px)] max-h-[750px] bg-white rounded-xl shadow-lg overflow-hidden">
+    <div className="flex flex-col h-[700px] max-h-[2000px] bg-white rounded-xl shadow-lg overflow-hidden">
       <div className="p-6 bg-gray-50 border-b border-gray-200">
         <h2 className="text-2xl font-bold text-gray-800">Chat with {agentCard.name}</h2>
         <p className="text-sm text-gray-500 mt-1">
@@ -254,11 +254,11 @@ function ChatInterface({ agentCard }) {
                   </button>
                   {!isThinkingCollapsed[msg.id] && (
                     <div className="mt-2 p-3 bg-gray-100 rounded-lg text-sm text-gray-600">
-                      {thinkingMessages[msg.id].map((thought, index) => (
-                        <p key={index} className="whitespace-pre-wrap">
-                          {thought}
+                      <div className="mt-2 p-3 bg-gray-100 rounded-lg text-sm text-gray-600">
+                        <p className="whitespace-pre-wrap">
+                          {thinkingMessages[msg.id].join('')}
                         </p>
-                      ))}
+                      </div>
                     </div>
                   )}
                 </div>

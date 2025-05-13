@@ -29,7 +29,9 @@ async def generate_with_bytedance_stream(client: AsyncOpenAI, model_name: str, c
 
         async for chunk in response:
             delta = chunk.choices[0].delta
-            
+            if delta.model_extra:
+                if "reasoning_content" in delta.model_extra:
+                    yield {"assistant_text": delta.model_extra["reasoning_content"], "tool_calls": [], "is_chunk": True, "token": True, "is_reasoning": True}
             if delta.content:
                 # Immediately yield each token without buffering
                 yield {"assistant_text": delta.content, "tool_calls": [], "is_chunk": True, "token": True}

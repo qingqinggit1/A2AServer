@@ -91,6 +91,19 @@ graph TD
     B --> F[MCP Tool2]
 ```
 
+## 单Agent的Reasoning调用流程
+问题-->推理-->MCP Tool1-->推理-->MCP Tool2-->推理 -->回答
+```mermaid
+graph TD
+    A[前端] --> B[Agent1]
+    B --> C[Reasoning Text]
+    C --> D[MCP Tool1]
+    D --> F[Reasoning Text]
+    F --> E[MCP Tool2]
+    E --> G[Reasoning Text]
+    G --> H[Answer]
+```
+
 #### 1. 启动1个Agent
 - **Agent RAG**：
 ```bash

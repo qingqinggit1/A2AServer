@@ -82,6 +82,21 @@ graph TD
     B --> F[MCP Tool2]
 ```
 
+## Reasoning Flow for a Single Agent
+
+Question → Reasoning → MCP Tool 1 → Reasoning → MCP Tool 2 → Reasoning → Answer
+
+```mermaid
+graph TD
+    A[前端] --> B[Agent1]
+    B --> C[Reasoning Text]
+    C --> D[MCP Tool1]
+    D --> F[Reasoning Text]
+    F --> E[MCP Tool2]
+    E --> G[Reasoning Text]
+    G --> H[Answer]
+```
+
 ### Multi-Agent Setup
 This section demonstrates how to set up a multi-agent system with collaboration between A2A agents.
 
