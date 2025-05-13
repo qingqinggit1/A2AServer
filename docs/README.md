@@ -18,4 +18,8 @@ These documents provide a detailed overview of the application's user interface,
 
 These documents offer detailed information about different Large Language Model configurations, including configuration parameters, usage instructions, and related considerations.
 
+## Issue Summary
+1. The official Deepseek-R1 model does not support function calling, so using it will result in errors. However, the Deepseek-R1 model provided by Volcano Engine supports both function calling and reasoning, and is recommended.
+
+
 Please refer to the respective documents for more detailed information.
