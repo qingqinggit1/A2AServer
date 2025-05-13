@@ -36,6 +36,24 @@ VLLM_BASE_URL="http://xxxx:xxx/v1"
 ```
 
 2.  运行命令：`python main.py --provider vllm --model xxx`， model是你创建vllm时的模型
+3.  注意vllm启动示例,注意需要启动工具的调用还有工具的形式：--enable-auto-tool-choice --tool-call-parser hermes
+```
+docker run --gpus all \
+  -d -p 8000:8000 \
+  --privileged \
+  -e CUDA_VISIBLE_DEVICES=1 \
+  -v /media/model/Qwen3-14B:/models \
+  --name tool_container \
+  vllm/vllm-openai:v0.6.2 \
+  --trust-remote-code \
+  --enforce-eager \
+  --max-model-len 10240 \
+  --tensor-parallel-size 1 \
+  --model /models \
+  --download-dir /models \
+  --enable-auto-tool-choice --tool-call-parser hermes \
+  --served-model-name 2-5-7B-Instruct
+```
 
 ## 智谱模型
 1.  在你的项目中创建 `.env` 文件中需要添加

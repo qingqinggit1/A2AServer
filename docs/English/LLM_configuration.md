@@ -36,6 +36,25 @@ VLLM_API_KEY=xxxxx
 VLLM_BASE_URL="http://xxxx:xxx/v1"
 ```
 2. Run the command: python main.py --provider vllm --model xxx, where model is the model you created when setting up VLLM.
+3. Pay attention to the vLLM startup example, noting the need to enable tool calling and the format of the tools：--enable-auto-tool-choice --tool-call-parser hermes
+```
+docker run --gpus all \
+  -d -p 8000:8000 \
+  --privileged \
+  -e CUDA_VISIBLE_DEVICES=1 \
+  -v /media/model/Qwen3-14B:/models \
+  --name tool_container \
+  vllm/vllm-openai:v0.6.2 \
+  --trust-remote-code \
+  --enforce-eager \
+  --max-model-len 10240 \
+  --tensor-parallel-size 1 \
+  --model /models \
+  --download-dir /models \
+  --enable-auto-tool-choice --tool-call-parser hermes \
+  --served-model-name 2-5-7B-Instruct
+```
+
 
 ## Zhipu Model
 1. You need to add the following to the .env file in your project:
