@@ -119,7 +119,7 @@ async def generate_with_bytedance_stream(client: AsyncOpenAI, model_name: str, c
                 }
 
     except Exception as e:
-        yield {"assistant_text": f"OpenAI error: {str(e)}", "tool_calls": [], "is_chunk": False}
+        yield {"assistant_text": f"bytedance API error: {str(e)}", "tool_calls": [], "is_chunk": False}
 
 async def generate_with_bytedance_sync(client: AsyncOpenAI, model_name: str, conversation: List[Dict],
                                   formatted_functions: List[Dict], temperature: Optional[float] = None,
@@ -160,11 +160,11 @@ async def generate_with_bytedance_sync(client: AsyncOpenAI, model_name: str, con
         return {"assistant_text": assistant_text, "tool_calls": tool_calls}
 
     except APIError as e:
-        return {"assistant_text": f"OpenAI API error: {str(e)}", "tool_calls": []}
+        return {"assistant_text": f"Bytedance API error: {str(e)}", "tool_calls": []}
     except RateLimitError as e:
-        return {"assistant_text": f"OpenAI rate limit: {str(e)}", "tool_calls": []}
+        return {"assistant_text": f"Bytedance rate limit: {str(e)}", "tool_calls": []}
     except Exception as e:
-        return {"assistant_text": f"Unexpected OpenAI error: {str(e)}", "tool_calls": []}
+        return {"assistant_text": f"Unexpected Bytedance error: {str(e)}", "tool_calls": []}
 
 async def generate_with_bytedance(conversation: List[Dict], model_cfg: Dict,
                              all_functions: List[Dict], stream: bool = False) -> Union[Dict, AsyncGenerator]:
