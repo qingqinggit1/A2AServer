@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 @click.command(help="启动 A2A Server，用于加载智能 Agent 并响应任务请求")
-@click.option("--host", "host", default="0.0.0.0", help="服务器绑定的主机名（默认为 localhost）")
+@click.option("--host", "host", default="localhost", help="服务器绑定的主机名（默认为 localhost,可以指定具体本机ip）")
 @click.option("--port", "port", default=10004,help="服务器监听的端口号（默认为 10004）")
 @click.option("--prompt", "agent_prompt_file", default="prompt.txt",help="Agent 的 prompt 文件路径（默认为 prompt.txt）")
 @click.option("--model", "model_name", default="deepseek-chat",help="使用的模型名称（如 deepseek-chat）")
