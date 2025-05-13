@@ -18,6 +18,9 @@ from .providers.deepseek import generate_with_deepseek
 from .providers.anthropic import generate_with_anthropic
 from .providers.ollama import generate_with_ollama
 from .providers.lmstudio import generate_with_lmstudio
+from .providers.vllm import generate_with_vllm
+from .providers.bytedance import generate_with_bytedance
+from .providers.zhipu import generate_with_zhipu
 
 logger = logging.getLogger(__name__)
 
@@ -376,9 +379,27 @@ async def generate_text(conversation: List[Dict], model_cfg: Dict,
             # If it returns a coroutine that *needs* awaiting to get the generator, await it.
             # Let's assume the first await gets the generator object needed for async for.
             return await generator_coroutine # Return the awaitable generator object
+        elif provider == "vllm":
+            # *** Return the generator object directly ***
+            generator_coroutine = generate_with_vllm(conversation, model_cfg, all_functions, stream=True)
+            # Await the coroutine returned by the async generator function call
+            # to get the actual async generator object.
+            return await generator_coroutine # Return the awaitable generator object
+        elif provider == "bytedance":
+            # *** Return the generator object directly ***
+            generator_coroutine = generate_with_bytedance(conversation, model_cfg, all_functions, stream=True)
+            # Await the coroutine returned by the async generator function call
+            # to get the actual async generator object.
+            return await generator_coroutine # Return the awaitable generator object
         elif provider == "deepseek":
             # *** Return the generator object directly ***
             generator_coroutine = generate_with_deepseek(conversation, model_cfg, all_functions, stream=True)
+            # Await the coroutine returned by the async generator function call
+            # to get the actual async generator object.
+            return await generator_coroutine # Return the awaitable generator object
+        elif provider == "zhipu":
+            # *** Return the generator object directly ***
+            generator_coroutine = generate_with_zhipu(conversation, model_cfg, all_functions, stream=True)
             # Await the coroutine returned by the async generator function call
             # to get the actual async generator object.
             return await generator_coroutine # Return the awaitable generator object
@@ -412,6 +433,12 @@ async def generate_text(conversation: List[Dict], model_cfg: Dict,
             return await generate_with_openai(conversation, model_cfg, all_functions, stream=False)
         elif provider == "deepseek":
             return await generate_with_deepseek(conversation, model_cfg, all_functions, stream=False)
+        elif provider == "zhipu":
+            return await generate_with_zhipu(conversation, model_cfg, all_functions, stream=False)
+        elif provider == "bytedance":
+            return await generate_with_bytedance(conversation, model_cfg, all_functions, stream=False)
+        elif provider == "vllm":
+            return await generate_with_vllm(conversation, model_cfg, all_functions, stream=False)
         elif provider == "anthropic":
             return await generate_with_anthropic(conversation, model_cfg, all_functions)
         elif provider == "ollama":

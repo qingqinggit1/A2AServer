@@ -22,7 +22,7 @@ Key highlights:
 - **Clear Structure**: Well-organized project with comprehensive examples for single and multi-agent setups.
 - **Full-Stack Solution**: Includes both backend (Python) and frontend (Node.js) components for immediate deployment.
 - **Rich Examples**: Demonstrates practical use cases for both single-agent and multi-agent collaboration.
-- **Multi-LLM Model Support**: Seamlessly integrates and supports various leading language models, including OpenAI, DeepSeek, Anthropic, and Ollama, offering users flexibility and choice.
+- **Multi-LLM Model Support**: Seamlessly integrates and supports various leading language models, including OpenAI, DeepSeek, Anthropic, Ollama, VLLM, Bytedance offering users flexibility and choice.
 
 
 ## ✨ Why Choose A2A-MCP Server Framework?
