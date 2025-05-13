@@ -62,21 +62,6 @@ class BasicAgent:
         # except RuntimeError:
         #     self.tool_ready = asyncio.run(self.setup_tools())
 
-    def _choose_model(self, model_name):
-        # Helper method for model selection logic (synchronous)
-        chosen_model = None
-        for m in self.models_cfg:
-         if m.get("model") == model_name or m.get("title") == model_name:
-             chosen_model = m
-             break
-        if not chosen_model:
-         for m in self.models_cfg:
-             if m.get("default"):
-                 chosen_model = m
-                 break
-        print(f"Chosen model: {chosen_model}")
-        return chosen_model
-
 
     async def setup_tools(self):
         """
