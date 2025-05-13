@@ -183,6 +183,10 @@ cd backend/MyCustomAgent
 python main.py --port 10006
 ```
 
+## Best Practices
+- **Prompts**: Please carefully experiment with your different prompts to achieve the best experience.
+- **MCP Tools**: The naming and description of MCP tools, as well as the docstrings for MCP tool functions, must precisely align with the business logic to make them easy for the LLM to understand.
+
 ## ⚠️ Notes
 - **Tool Naming**: Use camelCase for tool names in `mcp_config.json` (e.g., `SearchTool`, `RAGTool`) to ensure compatibility.
 - **Environment Variables**: Store API keys and sensitive data in the `.env` file.

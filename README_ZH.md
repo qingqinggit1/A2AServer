@@ -187,6 +187,10 @@ cd backend/MyCustomAgent
 python main.py --port 10006
 ```
 
+## 最佳实践
+- **Prompts**: 请精心尝试你的不同的prompt, 以获得最佳体验。
+- **MCP工具**： MCP工具命名和描述，还有MCP工具函数的docstring，一定要精确符合业务，让LLM便于理解。
+
 ## ⚠️ 注意事项
 - **工具命名**：在`mcp_config.json`中使用驼峰命名法（例如`SearchTool`、`RAGTool`）以确保兼容性。
 - **环境变量**：将API密钥和敏感数据存储在`.env`文件中。
