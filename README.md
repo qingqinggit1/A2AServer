@@ -74,6 +74,8 @@ Open the frontend in your browser, add the agent, and start interacting through 
 #### 3. UI Example
 ![SingleAgentHome](docs/images/SingleAgentHome.png)
 
+More UI: ![UI](docs/English/UI.md)
+
 ## Single Agent Call Flow
 ```mermaid
 graph TD
