@@ -31,10 +31,6 @@ logger = logging.getLogger(__name__)
 
 
 def decode_tool_calls_to_string(raw_str: str) -> str:
-    # 去掉前缀
-    if raw_str.startswith("Tool:CALL:"):
-        raw_str = raw_str[len("Tool:CALL:"):]
-
     # 解析 JSON
     tool_calls = json.loads(raw_str)
 
@@ -51,9 +47,6 @@ def decode_tool_calls_to_string(raw_str: str) -> str:
 
 
 def decode_tool_call_result_to_string(raw_str: str) -> str:
-    # 去掉前缀
-    if raw_str.startswith("Tool:RESULT:"):
-        raw_str = raw_str[len("Tool:RESULT:"):]
     load_json = json.loads(raw_str)
     # tool执行的结果
     content = load_json.get("content", "")
