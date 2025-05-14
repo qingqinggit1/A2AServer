@@ -20,6 +20,6 @@ These documents offer detailed information about different Large Language Model 
 
 ## Issue Summary
 1. The official Deepseek-R1 model does not support function calling, so using it will result in errors. However, the Deepseek-R1 model provided by Volcano Engine supports both function calling and reasoning, and is recommended.
-
+2. It is essential to ensure the uniqueness of the `session_id` for each session passed to the Agent.
 
 Please refer to the respective documents for more detailed information.
