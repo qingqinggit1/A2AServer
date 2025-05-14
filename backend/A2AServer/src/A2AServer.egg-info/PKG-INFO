@@ -18,5 +18,5 @@ Requires-Dist: google-genai>=1.10.0
 conda create --name adk python=3.12
 conda actiavte adk
 
-# 开发时安装项目依赖, 普通安装 pip install .
+# 安装项目依赖
 pip install -e .
