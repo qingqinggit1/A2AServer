@@ -80,6 +80,8 @@ npm run dev
 #### 3. UI示例
 ![SingleAgentHome](docs/images/SingleAgentHome.png)
 
+更详细的UI示例: ![UI](docs/Chinese/UI.md)
+
 ### 多代理设置
 本节展示如何设置多代理系统，实现A2A代理之间的协作。
 
@@ -89,6 +91,19 @@ graph TD
     A[前端] --> B[Agent1]
     B --> E[MCP Tool1]
     B --> F[MCP Tool2]
+```
+
+## 单Agent的Reasoning调用流程
+问题-->推理-->MCP Tool1-->推理-->MCP Tool2-->推理 -->回答
+```mermaid
+graph TD
+    A[前端] --> B[Agent1]
+    B --> C[Reasoning Text]
+    C --> D[MCP Tool1]
+    D --> F[Reasoning Text]
+    F --> E[MCP Tool2]
+    E --> G[Reasoning Text]
+    G --> H[Answer]
 ```
 
 #### 1. 启动1个Agent
@@ -186,6 +201,10 @@ MyCustomAgent
 cd backend/MyCustomAgent
 python main.py --port 10006
 ```
+
+## 最佳实践
+- **Prompts**: 请精心尝试你的不同的prompt, 以获得最佳体验。
+- **MCP工具**： MCP工具命名和描述，还有MCP工具函数的docstring，一定要精确符合业务，让LLM便于理解。
 
 ## ⚠️ 注意事项
 - **工具命名**：在`mcp_config.json`中使用驼峰命名法（例如`SearchTool`、`RAGTool`）以确保兼容性。

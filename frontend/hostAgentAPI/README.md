@@ -1,288 +1,204 @@
-# API接口
+# Host Agent API
+📘 [中文Readme](./README_ZH.md)
 
-# 启动
-python api.py
+The coordinator and organizer Agent startup interface for A2A.
 
+# Getting Started
 
-# Get event的数据
-{
-  "jsonrpc": "2.0",
-  "id": "4c9c3e3de6814d46817ff2d49bbfc0db",
-  "result": [
-    {
-      "id": "88cc5ed3-c28b-44c3-a83b-247076b382d8",
-      "actor": "user",
-      "content": {
-        "role": "user",
-        "parts": [
-          {
-            "type": "text",
-            "text": "你好",
-            "metadata": null
+**Project Overview:**
+
+The goal of this project is to provide API interfaces for the coordinator and organizer agents of A2A to enable startup and management functionalities. Through these interfaces, seamless interaction with other agents can be achieved, thereby facilitating control over other agents.
+**Quick Start:**
+
+1.  **Environment Setup:**
+    * Ensure you have Python 3 installed on your system.
+    * (If the project has dependencies) Install the required packages using pip:
+        ```bash
+        pip install -r requirements.txt
+        ```
+        *Note: Execute this step if your project has a `requirements.txt` file. Otherwise, you can skip it.*
+
+2.  **Start the API Service:**
+    * Navigate to the project's root directory and run the following command to start the API service:
+        ```bash
+        python api.py
+        ```
+    * By default, the API service might start on a local address and port (e.g., `http://localhost:13000`). 
+
+**API Interface Testing:**
+
+The project includes a `test_api.py` script to test the functionality of each API endpoint. This script utilizes the `unittest` framework to send requests to each endpoint and verify the responses.
+
+1.  **Run the Test Script:**
+    * Ensure the API service is running successfully (see the "Start the API Service" step above).
+    * In the project's root directory, execute the test script:
+        ```bash
+        python test_api.py
+        ```
+    * The test script will automatically run all test cases and output the test results for each endpoint, including status codes, response content, and execution time, helping you verify the API's usability.
+
+**API Endpoint Documentation:**
+
+The following are the API endpoints and their functionalities, analyzed from the `test_api.py` file:
+
+* **`/ping` (GET)**
+    * **Functionality:** Tests if the API service is running and healthy.
+    * **Request Example:** `GET http://127.0.0.1:13000/ping`
+    * **Response Example:** `"Pong"`
+
+* **`/conversation/create` (POST)**
+    * **Functionality:** Creates a new conversation.
+    * **Request Body:** None
+    * **Response Example:**
+        ```json
+        {
+          "result": {
+            "conversation_id": "unique_conversation_id_generated"
           }
-        ],
-        "metadata": {
-          "conversation_id": "ec922cee-8664-40dc-9e89-aea8c8a55ae4",
-          "message_id": "07fb8cd2-06bc-45c0-a8e0-357d23c285c5"
         }
-      },
-      "timestamp": 1746670055.805705
-    },
-    {
-      "id": "f4469962-b3ac-4d1b-ba1f-4b3195fa209c",
-      "actor": "user",
-      "content": {
-        "role": "user",
-        "parts": [
-          {
-            "type": "text",
-            "text": "Hello",
-            "metadata": null
+        ```
+
+* **`/conversation/list` (POST)**
+    * **Functionality:** Lists all current conversations.
+    * **Request Body:** None
+    * **Response Example:**
+        ```json
+        {
+          "result": [
+            "conversation_id_1",
+            "conversation_id_2",
+            ...
+          ]
+        }
+        ```
+
+* **`/message/send` (POST)**
+    * **Functionality:** Sends a message to a specified conversation.
+    * **Request Body (application/json):**
+        ```json
+        {
+          "params": {
+            "role": "user",
+            "parts": [{"type": "text", "text": "Message content to send"}],
+            "metadata": {"conversation_id": "target_conversation_id"}
           }
-        ],
-        "metadata": {
-          "conversation_id": "908f6994-69fb-4619-9b70-7c2c15122dfc",
-          "message_id": "dc21f471-a3b9-42e1-8266-b101e0eb852b"
         }
-      },
-      "timestamp": 1746670290.967268
-    },
-    {
-      "id": "be0187eb-db3a-4632-a1b9-55964021c4d5",
-      "actor": "user",
-      "content": {
-        "role": "user",
-        "parts": [
-          {
-            "type": "text",
-            "text": "国网大连的价格是多少？",
-            "metadata": null
+        ```
+    * **Response Example:**
+        ```json
+        {
+          "result": {
+            "message_id": "generated_message_id",
+            "conversation_id": "corresponding_conversation_id"
           }
-        ],
-        "metadata": {
-          "conversation_id": "aa769ad9-221b-44c7-b493-0cf4f5212253",
-          "message_id": "53554617-9341-4c04-ac82-7eaaf125ff74"
         }
-      },
-      "timestamp": 1746685947.086226
-    },
-    {
-      "id": "888a056b-d804-4aaa-9d62-515102458cb7",
-      "actor": "LNG_Knowledge",
-      "content": {
-        "role": "user",
-        "parts": [
-          {
-            "type": "text",
-            "text": "国网大连的价格是多少？",
-            "metadata": null
-          }
-        ],
-        "metadata": {
-          "conversation_id": "aa769ad9-221b-44c7-b493-0cf4f5212253",
-          "message_id": "53554617-9341-4c04-ac82-7eaaf125ff74"
+        ```
+
+* **`/message/list` (POST)**
+    * **Functionality:** Lists all messages within a specified conversation.
+    * **Request Body (application/json):**
+        ```json
+        {
+          "params": "target_conversation_id"
         }
-      },
-      "timestamp": 1746685957.138772
-    },
-    {
-      "id": "7a5abf33-8062-46bc-afa4-b8ed16a6ed95",
-      "actor": "LNG_Knowledge",
-      "content": {
-        "role": "agent",
-        "parts": [
-          {
-            "type": "text",
-            "text": "TaskState.WORKING",
-            "metadata": null
-          }
-        ],
-        "metadata": {
-          "conversation_id": "aa769ad9-221b-44c7-b493-0cf4f5212253"
-        }
-      },
-      "timestamp": 1746685957.180841
-    },
-    {
-      "id": "5bc87616-487e-45af-a999-c39ed37f8d76",
-      "actor": "LNG_Knowledge",
-      "content": {
-        "role": "agent",
-        "parts": [
-          {
-            "type": "text",
-            "text": "用户询问的是国网大连的价格，但需要明确是天然气工厂的价格还是接收站的价格。大连可能涉及LNG接收站，因此需要先确认国网大连是指工厂还是接收站。",
-            "metadata": null
-          }
-        ],
-        "metadata": {
-          "conversation_id": "aa769ad9-221b-44c7-b493-0cf4f5212253",
-          "message_id": "3d861632-d1d3-4996-a92b-dd07c3208117",
-          "last_message_id": "53554617-9341-4c04-ac82-7eaaf125ff74"
-        }
-      },
-      "timestamp": 1746685973.084571
-    },
-    {
-      "id": "cb8b974b-3d6b-4c38-b45d-20cdc0b1877f",
-      "actor": "LNG_Knowledge",
-      "content": {
-        "role": "agent",
-        "parts": [
-          {
-            "type": "text",
-            "text": "TaskState.WORKING",
-            "metadata": null
-          }
-        ],
-        "metadata": {
-          "conversation_id": "aa769ad9-221b-44c7-b493-0cf4f5212253"
-        }
-      },
-      "timestamp": 1746685973.092069
-    },
-    {
-      "id": "8ba9f09f-7476-4d70-bf80-fa7ff82544b0",
-      "actor": "LNG_Knowledge",
-      "content": {
-        "role": "agent",
-        "parts": [
-          {
-            "type": "text",
-            "text": "",
-            "metadata": null
-          }
-        ],
-        "metadata": {
-          "conversation_id": "aa769ad9-221b-44c7-b493-0cf4f5212253",
-          "message_id": "5786c1f2-738b-4157-9a23-388d7b25a9ee",
-          "last_message_id": "53554617-9341-4c04-ac82-7eaaf125ff74"
-        }
-      },
-      "timestamp": 1746685979.121979
-    },
-    {
-      "id": "c2dffba4-8d83-444d-b891-d6749ff20375",
-      "actor": "LNG_Knowledge",
-      "content": {
-        "role": "agent",
-        "parts": [
-          {
-            "type": "text",
-            "text": "TaskState.WORKING",
-            "metadata": null
-          }
-        ],
-        "metadata": {
-          "conversation_id": "aa769ad9-221b-44c7-b493-0cf4f5212253"
-        }
-      },
-      "timestamp": 1746685979.17709
-    },
-    {
-      "id": "qBZEmgze",
-      "actor": "host_agent",
-      "content": {
-        "role": "agent",
-        "parts": [
-          {
-            "type": "text",
-            "text": "你好！请问有什么可以帮您的吗？",
-            "metadata": null
-          }
-        ],
-        "metadata": {
-          "conversation_id": "ec922cee-8664-40dc-9e89-aea8c8a55ae4"
-        }
-      },
-      "timestamp": 1746698855.815698
-    },
-    {
-      "id": "rKoxzBI7",
-      "actor": "host_agent",
-      "content": {
-        "role": "agent",
-        "parts": [
-          {
-            "type": "text",
-            "text": "Hello! How can I assist you today? If you have a specific task or request, feel free to let me know, and I can delegate it to the appropriate remote agent for you.",
-            "metadata": null
-          }
-        ],
-        "metadata": {
-          "conversation_id": "908f6994-69fb-4619-9b70-7c2c15122dfc"
-        }
-      },
-      "timestamp": 1746699090.990618
-    },
-    {
-      "id": "nyEArZWE",
-      "actor": "host_agent",
-      "content": {
-        "role": "agent",
-        "parts": [
-          {
-            "type": "data",
-            "data": {
-              "id": "call_0_d480ffa8-8936-4061-ab49-f12fd86cc10e",
-              "args": {},
-              "name": "list_remote_agents"
+        ```
+    * **Response Example:**
+        ```json
+        {
+          "result": [
+            {
+              "metadata": {"message_id": "message_id_1", ...},
+              "role": "user",
+              "parts": [{"type": "text", "text": "message_content_1"}]
             },
-            "metadata": null
-          }
-        ],
-        "metadata": {
-          "conversation_id": "aa769ad9-221b-44c7-b493-0cf4f5212253"
-        }
-      },
-      "timestamp": 1746714747.107039
-    },
-    {
-      "id": "Rntit8ip",
-      "actor": "host_agent",
-      "content": {
-        "role": "user",
-        "parts": [
-          {
-            "type": "data",
-            "data": {
-              "name": "LNG_Knowledge",
-              "description": "新奥公司的LNG知识"
+            {
+              "metadata": {"message_id": "message_id_2", ...},
+              "role": "assistant",
+              "parts": [{"type": "text", "text": "reply_content_1"}]
             },
-            "metadata": null
-          }
-        ],
-        "metadata": {
-          "conversation_id": "aa769ad9-221b-44c7-b493-0cf4f5212253"
+            ...
+          ]
         }
-      },
-      "timestamp": 1746714751.665175
-    },
-    {
-      "id": "kpCyX6a5",
-      "actor": "host_agent",
-      "content": {
-        "role": "agent",
-        "parts": [
-          {
-            "type": "data",
-            "data": {
-              "id": "call_0_1783fa77-070d-4c5c-9cd7-9435cd6c460d",
-              "args": {
-                "agent_name": "LNG_Knowledge",
-                "message": "国网大连的价格是多少？"
-              },
-              "name": "send_task"
-            },
-            "metadata": null
-          }
-        ],
-        "metadata": {
-          "conversation_id": "aa769ad9-221b-44c7-b493-0cf4f5212253"
+        ```
+
+* **`/message/pending` (POST)**
+    * **Functionality:** Retrieves messages that are currently being processed (pending).
+    * **Request Body:** None
+    * **Response Example:**
+        ```json
+        {
+          "result": [
+            ["conversation_id_1", "message_id_1"],
+            ["conversation_id_2", "message_id_2"],
+            ...
+          ]
         }
-      },
-      "timestamp": 1746714751.669145
-    }
-  ],
-  "error": null
-}
+        ```
+        *Note: An empty `result` array indicates that there are no messages currently pending.*
+
+* **`/events/get` (POST)**
+    * **Functionality:** Retrieves a list of events that have occurred (e.g., new message events).
+    * **Request Body:** None
+    * **Response Example:**
+        ```json
+        {
+          "result": [
+            {"event_type": "new_message", "data": {...}},
+            ...
+          ]
+        }
+        ```
+        *Note: The `result` may contain event information when new questions or interactions occur.*
+
+* **`/task/list` (POST)**
+    * **Functionality:** Lists the current tasks.
+    * **Request Body:** None
+    * **Response Example:**
+        ```json
+        {
+          "result": [
+            {"task_id": "task_id_1", "status": "running", ...},
+            ...
+          ]
+        }
+        ```
+
+* **`/agent/register` (POST)**
+    * **Functionality:** Registers a new Agent.
+    * **Request Body (application/json):**
+        ```json
+        {
+          "params": "URL address of the Agent (e.g., 127.0.0.1:10003)"
+        }
+        ```
+    * **Response Example:**
+        ```json
+        {
+          "result": "registration_result_information"
+        }
+        ```
+
+* **`/agent/list` (POST)**
+    * **Functionality:** Lists all registered Agents.
+    * **Request Body:** None
+    * **Response Example:**
+        ```json
+        {
+          "result": ["agent_url_1", "agent_url_2", ...]
+        }
+        ```
+
+* **`/api_key/update` (POST)**
+    * **Functionality:** Updates the API Key.
+    * **Request Body (application/json):**
+        ```json
+        {
+          "api_key": "new_api_key"
+        }
+        ```
+    * **Response Example:**
+        ```json
+        {
+          "status": "success"
+        }
+        ```

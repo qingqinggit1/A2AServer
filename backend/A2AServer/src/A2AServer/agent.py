@@ -62,21 +62,6 @@ class BasicAgent:
         # except RuntimeError:
         #     self.tool_ready = asyncio.run(self.setup_tools())
 
-    def _choose_model(self, model_name):
-        # Helper method for model selection logic (synchronous)
-        chosen_model = None
-        for m in self.models_cfg:
-         if m.get("model") == model_name or m.get("title") == model_name:
-             chosen_model = m
-             break
-        if not chosen_model:
-         for m in self.models_cfg:
-             if m.get("default"):
-                 chosen_model = m
-                 break
-        print(f"Chosen model: {chosen_model}")
-        return chosen_model
-
 
     async def setup_tools(self):
         """
@@ -205,7 +190,7 @@ class BasicAgent:
 
     async def _stream_response_generator(self, sessionId):
          """Handles the streaming response logic (async generator)."""
-         # Move the stream logic from original init here
+         #分5种返回类型，1. reasoning, 2. normal,  4. tool_call, 5. tool_result
          while True:
              generator = await generate_text(self.conversation, self.chosen_model, self.all_functions, stream=True)
              accumulated_text = ""
@@ -214,12 +199,16 @@ class BasicAgent:
              async for chunk in generator: # AWAIT is used to iterate over the async generator
                  if chunk.get("is_chunk", False):
                      if chunk.get("token", False):
-                         yield chunk["assistant_text"] # YIELD is used in a generator
-                     accumulated_text += chunk["assistant_text"]
+                         if chunk.get("is_reasoning"):
+                             yield {"text": chunk["assistant_text"], "type": "reasoning"}
+                         else:
+                            yield {"text": chunk["assistant_text"], "type": "normal"} # YIELD is used in a generator
+                     if not chunk.get("is_reasoning"):
+                        accumulated_text += chunk["assistant_text"]
                  else:
                      remaining = chunk["assistant_text"][len(accumulated_text):]
                      if remaining:
-                         yield remaining # YIELD here as well
+                         yield {"text": remaining, "type": "normal"} # YIELD here as well 剩余文本
 
                      tool_calls = chunk.get("tool_calls", [])
                      if tool_calls:
@@ -231,7 +220,7 @@ class BasicAgent:
                              "tool_calls": tool_calls
                          }
                          self.conversation.append(assistant_message)
-                         yield f"Tool:CALL:{json.dumps(tool_calls, ensure_ascii=False)}"
+                         yield {"text": f"{json.dumps(tool_calls, ensure_ascii=False)}", "type": "tool_call"}
 
                          for tc in tool_calls:
                              if tc.get("function", {}).get("name"):
@@ -240,7 +229,7 @@ class BasicAgent:
                                  if result:
                                      self.conversation.append(result)
                                      tool_calls_processed = True
-                                     yield f"Tool:RESULT:{json.dumps(result)}"
+                                     yield {"text": f"{json.dumps(result)}", "type": "tool_result"}
              if not tool_calls_processed:
                  break
 
@@ -331,22 +320,17 @@ class BasicAgent:
                 # Iterate through the chunks yielded by the response_generator
                 chunks = []
                 async for chunk in response_generator:
-                    if not chunk.startswith('Tool:'):
-                        chunks.append(chunk)
-                        is_tool = False
-                    else:
-                        is_tool = True
                     # Yield each chunk as it arrives.
                     yield {
                         "is_task_complete": False,  # Indicate it's an intermediate part
                         "require_user_input": False,
-                        "content": chunk,  # Yield the actual content chunk
-                        "is_tool":is_tool,
+                        "content": chunk["text"],  # Yield the actual content chunk
+                        "type":chunk["type"],
                     }
                 yield {
                     "is_task_complete": True,  # Indicate it's an intermediate part
                     "require_user_input": False,
-                    "content": "".join(chunks)  # Yield the actual content chunk
+                    "content": " "
                 }
             except Exception as e:
                 logger.error(f"Error during processing: {traceback.format_exc()}")

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
 const PRESET_AGENTS = [
-  { name: "LNG Agent", url: "http://localhost:10003" },
-  { name: "Deep Search", url: "http://localhost:10004" },
-  { name: "Agent RAG", url: "http://localhost:10005" },
+  { name: "http://localhost:10003", url: "http://localhost:10003" },
+  { name: "http://localhost:10004", url: "http://localhost:10004" },
+  { name: "http://localhost:10005", url: "http://localhost:10005" },
 ];
 
 function AgentSelector({ onAgentSelect, isLoading }) {

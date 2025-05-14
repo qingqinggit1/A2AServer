@@ -22,7 +22,7 @@ Key highlights:
 - **Clear Structure**: Well-organized project with comprehensive examples for single and multi-agent setups.
 - **Full-Stack Solution**: Includes both backend (Python) and frontend (Node.js) components for immediate deployment.
 - **Rich Examples**: Demonstrates practical use cases for both single-agent and multi-agent collaboration.
-- **Multi-LLM Model Support**: Seamlessly integrates and supports various leading language models, including OpenAI, DeepSeek, Anthropic, and Ollama, offering users flexibility and choice.
+- **Multi-LLM Model Support**: Seamlessly integrates and supports various leading language models, including OpenAI, DeepSeek, Anthropic, Ollama, VLLM, Bytedance offering users flexibility and choice.
 
 
 ## ✨ Why Choose A2A-MCP Server Framework?
@@ -74,12 +74,29 @@ Open the frontend in your browser, add the agent, and start interacting through 
 #### 3. UI Example
 ![SingleAgentHome](docs/images/SingleAgentHome.png)
 
+More UI: ![UI](docs/English/UI.md)
+
 ## Single Agent Call Flow
 ```mermaid
 graph TD
     A[Frontend] --> B[Agent1]
     B --> E[MCP Tool1]
     B --> F[MCP Tool2]
+```
+
+## Reasoning Flow for a Single Agent
+
+Question → Reasoning → MCP Tool 1 → Reasoning → MCP Tool 2 → Reasoning → Answer
+
+```mermaid
+graph TD
+    A[前端] --> B[Agent1]
+    B --> C[Reasoning Text]
+    C --> D[MCP Tool1]
+    D --> F[Reasoning Text]
+    F --> E[MCP Tool2]
+    E --> G[Reasoning Text]
+    G --> H[Answer]
 ```
 
 ### Multi-Agent Setup
@@ -182,6 +199,10 @@ MyCustomAgent
 cd backend/MyCustomAgent
 python main.py --port 10006
 ```
+
+## Best Practices
+- **Prompts**: Please carefully experiment with your different prompts to achieve the best experience.
+- **MCP Tools**: The naming and description of MCP tools, as well as the docstrings for MCP tool functions, must precisely align with the business logic to make them easy for the LLM to understand.
 
 ## ⚠️ Notes
 - **Tool Naming**: Use camelCase for tool names in `mcp_config.json` (e.g., `SearchTool`, `RAGTool`) to ensure compatibility.

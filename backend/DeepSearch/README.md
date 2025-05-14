@@ -16,7 +16,7 @@ pip install -e .
 ### 2. Configure Environment Variables
 Copy the environment template and customize it as needed:
 ```bash
-cp env_template.txt .env
+cp .env .env
 ```
 
 ### 3. Update Prompt File

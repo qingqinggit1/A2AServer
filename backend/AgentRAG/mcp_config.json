@@ -8,7 +8,7 @@
         "fastmcp",
         "fastmcp",
         "run",
-        "mcpserver/rag_tool.py"
+        "mcpserver/basic_RAG.py"
       ]
     }
   }

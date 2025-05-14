@@ -21,9 +21,9 @@ function ChatInterface({ agentCard }) {
   }, [agentCard]);
 
   const toggleThinkingCollapse = (messageId) => {
-    setIsThinkingCollapsed(prev => ({
+    setIsThinkingCollapsed((prev) => ({
       ...prev,
-      [messageId]: !prev[messageId]
+      [messageId]: !prev[messageId],
     }));
   };
 
@@ -33,9 +33,9 @@ function ChatInterface({ agentCard }) {
 
     const userMessage = { id: uuidv4(), type: 'user', text: prompt };
     const agentMessage = { id: uuidv4(), type: 'agent', text: '', isStreaming: true, thinking: [] };
-    setMessages(prev => [...prev, userMessage, agentMessage]);
-    setThinkingMessages(prev => ({ ...prev, [agentMessage.id]: [] }));
-    setIsThinkingCollapsed(prev => ({ ...prev, [agentMessage.id]: false }));
+    setMessages((prev) => [...prev, userMessage, agentMessage]);
+    setThinkingMessages((prev) => ({ ...prev, [agentMessage.id]: [] }));
+    setIsThinkingCollapsed((prev) => ({ ...prev, [agentMessage.id]: false }));
     setPrompt('');
     setIsSending(true);
     setError(null);
@@ -46,10 +46,10 @@ function ChatInterface({ agentCard }) {
     const payload = {
       id: taskId,
       sessionId,
-      acceptedOutputModes: ["text"],
+      acceptedOutputModes: ['text'],
       message: {
-        role: "user",
-        parts: [{ type: "text", text: prompt }],
+        role: 'user',
+        parts: [{ type: 'text', text: prompt }],
       },
     };
 
@@ -60,113 +60,102 @@ function ChatInterface({ agentCard }) {
         agentEndpointUrl,
         payload,
         (streamEvent) => {
-          console.log("接收到流事件：", streamEvent);
-          if (streamEvent.result?.status?.state === "working" && streamEvent.result?.status?.message) {
-            streamEvent.result.status.message.parts.forEach(part => {
-              if (part.type === "text" && part.text) {
-                setThinkingMessages(prev => ({
+          console.log('接收到流事件：', streamEvent);
+
+          // 处理思考过程（status.message）
+          if (streamEvent.result?.status?.state === 'working' && streamEvent.result?.status?.message) {
+            streamEvent.result.status.message.parts.forEach((part) => {
+              if (part.type === 'text' && part.text) {
+                setThinkingMessages((prev) => ({
                   ...prev,
-                  [agentMessage.id]: [...(prev[agentMessage.id] || []), part.text]
+                  [agentMessage.id]: [...(prev[agentMessage.id] || []), part.text],
                 }));
               }
             });
-          } else if (streamEvent.result?.status?.state === "completed" && streamEvent.result?.status?.message) {
-            let finalText = "";
-            streamEvent.result.status.message.parts.forEach(part => {
-              if (part.type === "text" && part.text) {
-                finalText += part.text;
-              }
-            });
-            setMessages(prev => prev.map(msg =>
-              msg.id === agentMessage.id ? { ...msg, text: finalText, isStreaming: false } : msg
-            ));
           }
 
-          if (streamEvent.result?.final) {
-            setMessages(prev => prev.map(msg =>
-              msg.id === agentMessage.id ? { ...msg, isStreaming: false } : msg
-            ));
+          // 处理最终答案（artifact）
+          if (streamEvent.result?.artifact) {
+            const { parts, append } = streamEvent.result.artifact;
+            parts.forEach((part) => {
+              if (part.type === 'text' && part.text) {
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === agentMessage.id
+                      ? {
+                          ...msg,
+                          text: append ? msg.text + part.text : part.text,
+                          isStreaming: !streamEvent.result.artifact.lastChunk,
+                        }
+                      : msg
+                  )
+                );
+              }
+            });
+          }
+
+          // 处理任务完成
+          if (streamEvent.result?.final || streamEvent.result?.status?.state === 'completed') {
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === agentMessage.id ? { ...msg, isStreaming: false } : msg
+              )
+            );
             setIsSending(false);
           }
         },
         (streamError) => {
-          console.error("流式传输错误：", streamError);
+          console.error('流式传输错误：', streamError);
           setError(`流式传输错误：${streamError.message}`);
-          setMessages(prev => prev.map(msg =>
-            msg.id === agentMessage.id
-              ? { ...msg, text: [`错误：${streamError.message}`], isStreaming: false }
-              : msg
-          ));
-          setIsSending(false);
-        },
-        async () => {
-          console.log("SSE 连接关闭，拉取最终结果。");
-          setMessages(prev => prev.map(msg =>
-            msg.id === currentStreamingMessageIdRef.current ? { ...msg, isStreaming: false } : msg
-          ));
-          try {
-            const finalTaskResponse = await getTaskResult(agentEndpointUrl, taskId);
-            console.log("最终任务结果：", finalTaskResponse);
-
-            if (finalTaskResponse.result?.status?.message) {
-              let finalText = "";
-              finalTaskResponse.result.status.message.parts.forEach(part => {
-                if (part.type === "text" && part.text) {
-                  finalText += part.text;
-                }
-              });
-              setMessages(prev => prev.map(msg =>
-                msg.id === currentStreamingMessageIdRef.current
-                  ? { ...msg, text: finalText, isStreaming: false }
-                  : msg
-              ));
-            } else if (finalTaskResponse.error) {
-              throw new Error(`最终任务出错：${finalTaskResponse.error.message}`);
-            }
-          } catch (finalTaskError) {
-            console.error("拉取最终任务出错：", finalTaskError);
-            setError(`拉取最终结果出错：${finalTaskError.message}`);
-            setMessages(prev => prev.map(msg =>
-              msg.id === currentStreamingMessageIdRef.current
-                ? { ...msg, text: [`拉取错误：${finalTaskError.message}`], isStreaming: false }
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === agentMessage.id
+                ? { ...msg, text: `错误：${streamError.message}`, isStreaming: false }
                 : msg
-            ));
-          } finally {
-            setIsSending(false);
-            currentStreamingMessageIdRef.current = null;
-            abortStreamingRef.current = null;
-          }
+            )
+          );
+          setIsSending(false);
         }
       );
     } else {
       try {
         const initialResponse = await sendTaskNonStreaming(agentEndpointUrl, payload);
-        let agentResponseText = "处理中...";
+        let agentResponseText = '处理中...';
 
         if (initialResponse.error) {
           throw new Error(`Agent 错误：${initialResponse.error.message}`);
         }
 
-        if (initialResponse.result?.status?.state === "completed") {
-          agentResponseText = initialResponse.result.status.message?.parts.find(p => p.type === 'text')?.text || "无文本内容。";
+        if (initialResponse.result?.status?.state === 'completed') {
+          agentResponseText =
+            initialResponse.result.status.message?.parts.find((p) => p.type === 'text')?.text ||
+            '无文本内容。';
         } else {
           const finalTaskResponse = await getTaskResult(agentEndpointUrl, taskId);
           if (finalTaskResponse.result?.status?.message) {
-            agentResponseText = finalTaskResponse.result.status.message.parts.find(p => p.type === 'text')?.text || "最终结果无文本。";
+            agentResponseText =
+              finalTaskResponse.result.status.message.parts.find((p) => p.type === 'text')?.text ||
+              '最终结果无文本。';
           } else if (finalTaskResponse.error) {
             throw new Error(`拉取任务失败：${finalTaskResponse.error.message}`);
           }
         }
 
-        setMessages(prev => prev.map(msg =>
-          msg.id === agentMessage.id ? { ...msg, text: agentResponseText, isStreaming: false } : msg
-        ));
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === agentMessage.id ? { ...msg, text: agentResponseText, isStreaming: false } : msg
+          )
+        );
       } catch (err) {
-        console.error("非流式错误：", err);
+        console.error('非流式错误：', err);
         setError(`错误：${err.message}`);
-        setMessages(prev => prev.map(msg =>
-          msg.id === agentMessage.id ? { ...msg, text: [`错误：${err.message}`], isStreaming: false } : msg
-        ));
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === agentMessage.id
+              ? { ...msg, text: `错误：${err.message}`, isStreaming: false }
+              : msg
+          )
+        );
       } finally {
         setIsSending(false);
       }
@@ -183,19 +172,27 @@ function ChatInterface({ agentCard }) {
 
   const messagesEndRef = useRef(null);
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, thinkingMessages]);
 
   if (!agentCard) {
-    return <div className="p-6 text-center text-gray-500 text-lg font-medium bg-white rounded-xl shadow-lg">请先选择一个智能体以开始聊天。</div>;
+    return (
+      <div className="p-6 text-center text-gray-500 text-lg font-medium bg-white rounded-xl shadow-lg">
+        请先选择一个智能体以开始聊天。
+      </div>
+    );
   }
 
   if (!sessionId) {
-    return <div className="p-6 text-center text-gray-500 text-lg font-medium bg-white rounded-xl shadow-lg">正在生成会话 ID...</div>;
+    return (
+      <div className="p-6 text-center text-gray-500 text-lg font-medium bg-white rounded-xl shadow-lg">
+        正在生成会话 ID...
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-300px)] max-h-[750px] bg-white rounded-xl shadow-lg overflow-hidden">
+    <div className="flex flex-col h-[700px] max-h-[2000px] bg-white rounded-xl shadow-lg overflow-hidden">
       <div className="p-6 bg-gray-50 border-b border-gray-200">
         <h2 className="text-2xl font-bold text-gray-800">Chat with {agentCard.name}</h2>
         <p className="text-sm text-gray-500 mt-1">
@@ -205,12 +202,25 @@ function ChatInterface({ agentCard }) {
       </div>
 
       <div className="flex-grow p-6 space-y-6 overflow-y-auto bg-gray-50">
-        {messages.map(msg => (
-          <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} items-start`}>
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} items-start`}
+          >
             {msg.type === 'agent' && (
               <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-3">
-                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                <svg
+                  className="w-6 h-6 text-indigo-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
                 </svg>
               </div>
             )}
@@ -227,19 +237,28 @@ function ChatInterface({ agentCard }) {
                   >
                     {isThinkingCollapsed[msg.id] ? 'Show Thought Process' : 'Hide Thought Process'}
                     <svg
-                      className={`w-4 h-4 ml-1 transform ${isThinkingCollapsed[msg.id] ? '' : 'rotate-180'}`}
+                      className={`w-4 h-4 ml-1 transform ${
+                        isThinkingCollapsed[msg.id] ? '' : 'rotate-180'
+                      }`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
                   </button>
                   {!isThinkingCollapsed[msg.id] && (
                     <div className="mt-2 p-3 bg-gray-100 rounded-lg text-sm text-gray-600">
-                      {thinkingMessages[msg.id].map((thought, index) => (
-                        <p key={index} className="whitespace-pre-wrap">{thought}</p>
-                      ))}
+                      <div className="mt-2 p-3 bg-gray-100 rounded-lg text-sm text-gray-600">
+                        <p className="whitespace-pre-wrap">
+                          {thinkingMessages[msg.id].join('')}
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -251,8 +270,18 @@ function ChatInterface({ agentCard }) {
             </div>
             {msg.type === 'user' && (
               <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center ml-3">
-                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h18M5 9h14M3 17h18M5 21h14M5 3l4 3m0 0l-4 3m4-3v14" />
+                <svg
+                  className="w-6 h-6 text-indigo-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M3 5h18M5 9h14M3 17h18M5 21h14M5 3l4 3m0 0l-4 3m4-3v14"
+                  />
                 </svg>
               </div>
             )}
@@ -262,15 +291,10 @@ function ChatInterface({ agentCard }) {
       </div>
 
       {error && (
-        <div className="p-4 border-t bg-red-50 text-red-700 text-base font-medium">
-          {error}
-        </div>
+        <div className="p-4 border-t bg-red-50 text-red-700 text-base font-medium">{error}</div>
       )}
 
-      <form
-        onSubmit={handleSendMessage}
-        className="p-4 border-t flex items-center space-x-3 bg-white"
-      >
+      <form onSubmit={handleSendMessage} className="p-4 border-t flex items-center space-x-3 bg-white">
         <input
           type="text"
           value={prompt}

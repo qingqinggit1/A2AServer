@@ -1,5 +1,22 @@
-const SERVER_URL = 'http://localhost:13000'; // Adjust if your backend URL is different
+const SERVER_URL = import.meta.env.VITE_HOSTAGENT_API;
 const AGENT_CARD_PATH = '/.well-known/agent.json';
+
+
+//检测 API 是否存活
+export const checkApiStatus = async () => {
+  try {
+    console.log("Checking API status..., SERVER_URL:", SERVER_URL);
+    const response = await fetch(`${SERVER_URL}/ping`);
+    if (!response.ok) {
+      return false; // API 返回非 2xx 状态码，认为未存活
+    }
+    const data = await response.json();
+    return data === "Pong"; // 检查返回内容是否为 "Pong"
+  } catch (error) {
+    console.error("Ping API 请求失败:", error);
+    return false; // 请求失败认为未存活
+  }
+};
 
 /**
  * Fetches the list of remote agents from the backend.

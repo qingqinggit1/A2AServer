@@ -29,7 +29,9 @@ async def generate_with_deepseek_stream(client: AsyncOpenAI, model_name: str, co
 
         async for chunk in response:
             delta = chunk.choices[0].delta
-            
+            if delta.model_extra:
+                if "reasoning_content" in delta.model_extra:
+                    yield {"assistant_text": delta.model_extra["reasoning_content"], "tool_calls": [], "is_chunk": True, "token": True, "is_reasoning": True}
             if delta.content:
                 # Immediately yield each token without buffering
                 yield {"assistant_text": delta.content, "tool_calls": [], "is_chunk": True, "token": True}
@@ -117,7 +119,7 @@ async def generate_with_deepseek_stream(client: AsyncOpenAI, model_name: str, co
                 }
 
     except Exception as e:
-        yield {"assistant_text": f"OpenAI error: {str(e)}", "tool_calls": [], "is_chunk": False}
+        yield {"assistant_text": f"DeepSeek error: {str(e)}", "tool_calls": [], "is_chunk": False}
 
 async def generate_with_deepseek_sync(client: AsyncOpenAI, model_name: str, conversation: List[Dict],
                                   formatted_functions: List[Dict], temperature: Optional[float] = None,
@@ -158,11 +160,11 @@ async def generate_with_deepseek_sync(client: AsyncOpenAI, model_name: str, conv
         return {"assistant_text": assistant_text, "tool_calls": tool_calls}
 
     except APIError as e:
-        return {"assistant_text": f"OpenAI API error: {str(e)}", "tool_calls": []}
+        return {"assistant_text": f"DeepSeek API error: {str(e)}", "tool_calls": []}
     except RateLimitError as e:
-        return {"assistant_text": f"OpenAI rate limit: {str(e)}", "tool_calls": []}
+        return {"assistant_text": f"DeepSeek rate limit: {str(e)}", "tool_calls": []}
     except Exception as e:
-        return {"assistant_text": f"Unexpected OpenAI error: {str(e)}", "tool_calls": []}
+        return {"assistant_text": f"Unexpected DeepSeek error: {str(e)}", "tool_calls": []}
 
 async def generate_with_deepseek(conversation: List[Dict], model_cfg: Dict,
                              all_functions: List[Dict], stream: bool = False) -> Union[Dict, AsyncGenerator]:

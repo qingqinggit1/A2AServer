@@ -15,12 +15,6 @@ from typing import Dict, List, Any, Optional, Union, Mapping, TypeVar, cast, Cal
 # Third-party imports
 from pydantic import BaseModel, ValidationError
 
-# Configure logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler()]
-)
 logger = logging.getLogger('ollama')
 
 # Constants

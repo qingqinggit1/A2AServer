@@ -16,7 +16,7 @@ pip install -e .
 ### 2. 配置环境变量
 复制环境变量模板并根据需要进行修改：
 ```bash
-cp env_template.txt .env
+cp .env .env
 ```
 
 ### 3. 更新 Prompt 文件

@@ -5,15 +5,17 @@
 ## UI 界面
 
 - [中文用户界面指南](./Chinese/UI.md)
-- [英文用户界面指南](./English/UI.md)
 
 这两个文档详细介绍了应用程序的用户界面，包括单 Agent 和多 Agent 模式的使用示例，以及对话和思考过程的界面展示。文档中使用了图片进行说明，图片位于 `images` 目录下。
 
 ## 不同的 LLM 配置
 
 - [中文 LLM 配置指南](./Chinese/LLM_configuration.md)
-- [英文 LLM 配置指南](./English/LLM_configuration.md)
 
 这两个文档提供了关于不同大型语言模型配置的详细信息，包括配置参数、使用方法以及相关的注意事项。
+
+## 问题总结
+1. Deepseek官方Deepseek-R1模型不支持函数调用，因此使用Deepseek的R1模型会报错。但是火山引擎的deepseek-r1模型可以支持函数调用和思考，推荐。
+2. 保持传入Agent的会话的session_id的唯一，这是必须的。
 
 请查阅相应的文档以获取更详细的信息。

@@ -21,9 +21,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 @click.command(help="启动 A2A Server，用于加载智能 Agent 并响应任务请求")
-@click.option("--host", "host", default="localhost", help="服务器绑定的主机名（默认为 localhost）")
+@click.option("--host", "host", default="192.168.1.14", help="服务器绑定的主机名（默认为 localhost,可以指定具体本机ip）")
 @click.option("--port", "port", default=10005,help="服务器监听的端口号（默认为 10005）")
 @click.option("--prompt", "agent_prompt_file", default="prompt.txt",help="Agent 的 prompt 文件路径（默认为 prompt.txt）")
 @click.option("--model", "model_name", default="deepseek-chat",help="使用的模型名称（如 deepseek-chat）")
@@ -44,10 +43,11 @@ def main(host, port, agent_prompt_file, model_name, provider, mcp_config_path):
         skill = AgentSkill(
                 id="RAGAssistant",
                 name="RAGAssistant",
-                description="能够进行检索问答的助手",
+                description="能够进行语义检索问答",
                 tags=["rag", "qa"],
                 examples=[
-                    "解释下LNG"
+                    "解释下LNG",
+                    "飞机的分类"
                 ]
             )
         # 包括 agent 的名字、描述、接口 URL、支持的输入输出格式、版本号等
